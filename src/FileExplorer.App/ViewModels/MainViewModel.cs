@@ -6,6 +6,7 @@ using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FileExplorer.App.Services;
+using FileExplorer.App.Services.Settings;
 
 namespace FileExplorer.App.ViewModels;
 
@@ -13,6 +14,10 @@ public sealed partial class MainViewModel : ObservableObject
 {
     // True when the left pane (tabs) is focused; false when right is focused
     private bool _activeIsLeft = true;
+    private readonly List<string> _recentLocations = new();
+    private const int MaxRecentLocations = 5;
+    private PaneViewModel? _trackedLeftPane;
+    private PaneViewModel? _trackedRightPane;
 
     /// <summary>Allows the view to trigger property-change notifications.</summary>
     public new void OnPropertyChanged(string? propertyName) => base.OnPropertyChanged(propertyName);
@@ -21,14 +26,18 @@ public sealed partial class MainViewModel : ObservableObject
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        LeftTabs  = new PaneTabsViewModel(home);
-        RightTabs = new PaneTabsViewModel(home);
+        // Use the most recent location from history as the starting path
+        var savedRecent = App.SettingsService.Current.RecentLocations;
+        var startPath = savedRecent.FirstOrDefault(Directory.Exists) ?? home;
+
+        LeftTabs  = new PaneTabsViewModel(startPath);
+        RightTabs = new PaneTabsViewModel(startPath);
 
         LeftPane.IsActive  = true;
         RightPane.IsActive = false;
 
         // Initialize the terminal panel
-        TerminalPanel = new TerminalPanelViewModel(home, History);
+        TerminalPanel = new TerminalPanelViewModel(startPath, History);
         SubscribeToActiveTab();
 
         // Forward active-tab changes from the terminal panel
@@ -49,6 +58,7 @@ public sealed partial class MainViewModel : ObservableObject
                 OnPropertyChanged(nameof(LeftPane));
                 if (_activeIsLeft) OnPropertyChanged(nameof(ActivePane));
                 OnPropertyChanged(nameof(TerminalPrompt));
+                ResubscribeRecentTracking();
             }
         };
         RightTabs.PropertyChanged += (_, e) =>
@@ -61,6 +71,7 @@ public sealed partial class MainViewModel : ObservableObject
                 OnPropertyChanged(nameof(RightPane));
                 if (!_activeIsLeft) OnPropertyChanged(nameof(ActivePane));
                 OnPropertyChanged(nameof(TerminalPrompt));
+                ResubscribeRecentTracking();
             }
         };
 
@@ -69,8 +80,15 @@ public sealed partial class MainViewModel : ObservableObject
             new SortDescription(nameof(CommandHistoryEntry.Timestamp), ListSortDirection.Descending));
         HistoryView.Filter = FilterHistory;
 
-        _ = LeftPane.GoToAsync(home,  pushHistory: false);
-        _ = RightPane.GoToAsync(home, pushHistory: false);
+        _ = LeftPane.GoToAsync(startPath,  pushHistory: false);
+        _ = RightPane.GoToAsync(startPath, pushHistory: false);
+
+        // Load recent locations from persisted settings
+        _recentLocations.AddRange(App.SettingsService.Current.RecentLocations);
+        FolderTree.SetRecentLocations(_recentLocations);
+
+        // Track path changes on both panes for recent locations
+        ResubscribeRecentTracking();
     }
 
     // ─── Pane / Tab accessors ─────────────────────────────────────────────────
@@ -377,6 +395,45 @@ public sealed partial class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(TerminalPrompt));
             TerminalPanel.SyncWorkingDirectory(ActivePane.CurrentPath);
         }
+    }
+
+    private void OnAnyPanePathChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(PaneViewModel.CurrentPath)) return;
+        if (sender is not PaneViewModel pane) return;
+
+        var path = pane.CurrentPath;
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        // Skip drive roots (e.g. C:\, D:\)
+        if (Path.GetPathRoot(path)?.Equals(path, StringComparison.OrdinalIgnoreCase) == true) return;
+
+        // Remove if already present, then insert at front
+        _recentLocations.RemoveAll(p => p.Equals(path, StringComparison.OrdinalIgnoreCase));
+        _recentLocations.Insert(0, path);
+
+        // Keep only the most recent entries
+        if (_recentLocations.Count > MaxRecentLocations)
+            _recentLocations.RemoveRange(MaxRecentLocations, _recentLocations.Count - MaxRecentLocations);
+
+        FolderTree.SetRecentLocations(_recentLocations);
+
+        // Persist to settings
+        App.SettingsService.Update(s => s with { RecentLocations = new List<string>(_recentLocations) });
+    }
+
+    private void ResubscribeRecentTracking()
+    {
+        if (_trackedLeftPane is not null)
+            _trackedLeftPane.PropertyChanged -= OnAnyPanePathChanged;
+        if (_trackedRightPane is not null)
+            _trackedRightPane.PropertyChanged -= OnAnyPanePathChanged;
+
+        _trackedLeftPane = LeftPane;
+        _trackedRightPane = RightPane;
+
+        _trackedLeftPane.PropertyChanged  += OnAnyPanePathChanged;
+        _trackedRightPane.PropertyChanged += OnAnyPanePathChanged;
     }
 
     // ─── History ─────────────────────────────────────────────────────────────

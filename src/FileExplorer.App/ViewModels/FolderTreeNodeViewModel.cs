@@ -71,6 +71,7 @@ public sealed class FolderTreeViewModel
 {
     private readonly FavoritesService _favService = new();
     private int _favoritesInsertIndex;
+    private int _recentHeaderIndex;
 
     public ObservableCollection<FolderTreeNodeViewModel> Roots { get; } = [];
 
@@ -88,6 +89,10 @@ public sealed class FolderTreeViewModel
                     fav, ShellIconService.GetPathIcon(fav)));
             }
         }
+
+        // ── Recent section ────────────────────────────────────────────────────
+        AddHeader("🕒  Recent");
+        _recentHeaderIndex = Roots.Count - 1;
 
         // ── Quick Access section header ───────────────────────────────────────
         AddHeader("⚡  Quick Access");
@@ -173,6 +178,32 @@ public sealed class FolderTreeViewModel
     }
 
     private void SaveFavorites() => _favService.Save(GetFavoritePaths());
+
+    // ── Recent Locations ──────────────────────────────────────────────────────
+
+    /// <summary>Replaces the Recent section with the given paths (max 5, most recent first).</summary>
+    public void SetRecentLocations(IEnumerable<string> paths)
+    {
+        // Find the range of recent nodes: from _recentHeaderIndex+1 until the next header
+        int start = _recentHeaderIndex + 1;
+        int end = start;
+        while (end < Roots.Count && !Roots[end].IsHeader)
+            end++;
+
+        // Remove existing recent items
+        for (int i = end - 1; i >= start; i--)
+            Roots.RemoveAt(i);
+
+        // Insert new recent items
+        int insertAt = start;
+        foreach (var p in paths.Take(5))
+        {
+            if (!Directory.Exists(p)) continue;
+            Roots.Insert(insertAt++, new FolderTreeNodeViewModel(
+                Path.GetFileName(p.TrimEnd(Path.DirectorySeparatorChar)),
+                p, ShellIconService.GetPathIcon(p), addDummy: false));
+        }
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 

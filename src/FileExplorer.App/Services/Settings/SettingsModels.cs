@@ -45,6 +45,9 @@ public sealed record AppSettings
 
     [JsonPropertyName("advanced")]
     public AdvancedSettings Advanced { get; init; } = new();
+
+    [JsonPropertyName("recentLocations")]
+    public List<string> RecentLocations { get; init; } = [];
 }
 
 // ── Category records ───────────────────────────────────────────────────────
