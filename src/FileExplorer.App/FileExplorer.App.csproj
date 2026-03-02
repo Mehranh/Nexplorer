@@ -6,8 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon />
+    <ApplicationIcon>nexplorer.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="nexplorer.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FileExplorer.Core\FileExplorer.Core.csproj" />

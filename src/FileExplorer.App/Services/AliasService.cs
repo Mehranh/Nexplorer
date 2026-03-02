@@ -11,7 +11,7 @@ public sealed class AliasService
 {
     private static readonly string FilePath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                     "FileExplorer", "aliases.json");
+                     "Nexplorer", "aliases.json");
 
     private readonly List<CommandAlias> _aliases = new();
     public IReadOnlyList<CommandAlias> Aliases => _aliases;

@@ -8,7 +8,7 @@ public sealed class CommandHistoryStore
 {
     private static readonly string FilePath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                     "FileExplorer", "command-history.json");
+                     "Nexplorer", "command-history.json");
 
     public List<CommandHistoryEntry> Load()
     {

@@ -10,7 +10,7 @@ namespace FileExplorer.App.Services;
 public sealed class TerminalProfileService
 {
     private static readonly string BasePath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FileExplorer");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Nexplorer");
 
     private static readonly string ProfilesPath = Path.Combine(BasePath, "terminal-profiles.json");
     private static readonly string ThemesPath    = Path.Combine(BasePath, "terminal-themes.json");

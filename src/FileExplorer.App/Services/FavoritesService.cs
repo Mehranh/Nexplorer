@@ -8,7 +8,7 @@ public sealed class FavoritesService
 {
     private static readonly string FilePath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                     "FileExplorer", "favorites.json");
+                     "Nexplorer", "favorites.json");
 
     public List<string> Load()
     {
