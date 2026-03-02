@@ -181,6 +181,14 @@
                                     <Setter Property="Foreground" Value="#DCB86C"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                 </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                        <Condition Binding="{Binding DataContext.IsSingleClickMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="TextDecorations" Value="Underline"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
@@ -204,6 +212,14 @@
                                     <Setter Property="Foreground" Value="#DCB86C"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                 </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                        <Condition Binding="{Binding DataContext.IsSingleClickMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="TextDecorations" Value="Underline"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
@@ -227,6 +243,14 @@
                                     <Setter Property="Foreground" Value="#DCB86C"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                 </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                        <Condition Binding="{Binding DataContext.IsSingleClickMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="TextDecorations" Value="Underline"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
@@ -250,6 +274,14 @@
                                         <Setter Property="Foreground" Value="#DCB86C"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                            <Condition Binding="{Binding DataContext.IsSingleClickMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="TextDecorations" Value="Underline"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </MultiDataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
@@ -594,6 +626,14 @@
                                                                                 <Setter Property="Foreground" Value="#DCB86C"/>
                                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                                             </DataTrigger>
+                                                                            <MultiDataTrigger>
+                                                                                <MultiDataTrigger.Conditions>
+                                                                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                                                                    <Condition Binding="{Binding DataContext.IsSingleClickMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                                                                </MultiDataTrigger.Conditions>
+                                                                                <Setter Property="TextDecorations" Value="Underline"/>
+                                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                            </MultiDataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
                                                                 </TextBlock.Style>
@@ -834,6 +874,14 @@
                                                                                 <Setter Property="Foreground" Value="#DCB86C"/>
                                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                                             </DataTrigger>
+                                                                            <MultiDataTrigger>
+                                                                                <MultiDataTrigger.Conditions>
+                                                                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                                                                    <Condition Binding="{Binding DataContext.IsSingleClickMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                                                                </MultiDataTrigger.Conditions>
+                                                                                <Setter Property="TextDecorations" Value="Underline"/>
+                                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                            </MultiDataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
                                                                 </TextBlock.Style>

@@ -91,6 +91,11 @@ public sealed partial class MainViewModel : ObservableObject
         ResubscribeRecentTracking();
     }
 
+    // ─── Click mode ───────────────────────────────────────────────────────────
+
+    public bool IsSingleClickMode
+        => App.SettingsService.Current.General.ClickMode == Services.Settings.ClickMode.SingleClick;
+
     // ─── Pane / Tab accessors ─────────────────────────────────────────────────
 
     public PaneTabsViewModel LeftTabs  { get; }
