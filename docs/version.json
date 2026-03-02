@@ -1,5 +1,5 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "downloadUrl": "https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi",
   "releaseNotes": "Renamed solution and projects from FileExplorer to Nexplorer."
 }
