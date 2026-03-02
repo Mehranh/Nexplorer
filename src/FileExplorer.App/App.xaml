@@ -47,6 +47,25 @@
             <SolidColorBrush x:Key="DangerBorder"     Color="#8B3030"/>
             <SolidColorBrush x:Key="DangerHoverBg"    Color="#5A2020"/>
 
+            <!-- Diff / Git themed colours -->
+            <SolidColorBrush x:Key="DiffBg"              Color="#1A1A1A"/>
+            <SolidColorBrush x:Key="DiffAddedHeaderBg"   Color="#152D15"/>
+            <SolidColorBrush x:Key="DiffRemovedHeaderBg" Color="#2D1515"/>
+            <SolidColorBrush x:Key="DiffAddedFg"         Color="#4EC94E"/>
+            <SolidColorBrush x:Key="DiffRemovedFg"       Color="#F14C4C"/>
+            <SolidColorBrush x:Key="DiffAddedSubFg"      Color="#448844"/>
+            <SolidColorBrush x:Key="DiffRemovedSubFg"    Color="#884444"/>
+            <SolidColorBrush x:Key="DiffUnchangedFg"     Color="#AAAAAA"/>
+            <SolidColorBrush x:Key="DiffLineNumFg"       Color="#555555"/>
+            <SolidColorBrush x:Key="GitStatusBg"         Color="#1E2D1E"/>
+            <SolidColorBrush x:Key="GitStatusFg"         Color="#73C991"/>
+            <SolidColorBrush x:Key="GitAvatarBg"         Color="#2D4A2D"/>
+            <SolidColorBrush x:Key="GitAvatarFg"         Color="#7FCC7F"/>
+            <SolidColorBrush x:Key="FolderNameFg"        Color="#DCB86C"/>
+            <SolidColorBrush x:Key="HashFg"              Color="#569CD6"/>
+            <SolidColorBrush x:Key="HistorySearchLabelFg" Color="#61D6D6"/>
+            <SolidColorBrush x:Key="HistorySearchResultFg" Color="#F9F1A5"/>
+
             <!-- ── Base TextBox ───────────────────────────────────────────── -->
             <Style TargetType="TextBox">
                 <Setter Property="Background"            Value="{DynamicResource InputBg}"/>
@@ -254,10 +273,10 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bd" Property="Background" Value="#106EBE"/>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonHoverBg}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bd" Property="Background" Value="#005A9E"/>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonPressedBg}"/>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Opacity" Value="0.4"/>

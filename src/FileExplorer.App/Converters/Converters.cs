@@ -43,17 +43,13 @@ public sealed class TabActiveBrushConverter : IValueConverter
 {
     public static readonly TabActiveBrushConverter Instance = new();
 
-    private static readonly Brush ActiveBrush   = new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x2E));
-    private static readonly Brush InactiveBrush = new SolidColorBrush(Color.FromRgb(0x2D, 0x2D, 0x30));
-
-    static TabActiveBrushConverter()
-    {
-        ActiveBrush.Freeze();
-        InactiveBrush.Freeze();
-    }
-
     public object Convert(object value, Type _, object __, CultureInfo ___)
-        => value is true ? ActiveBrush : InactiveBrush;
+    {
+        var res = Application.Current.Resources;
+        if (value is true)
+            return res["PaneBg"] as Brush ?? Brushes.White;
+        return res["HeaderBg"] as Brush ?? Brushes.LightGray;
+    }
 
     public object ConvertBack(object v, Type t, object p, CultureInfo c)
         => throw new NotSupportedException();
@@ -79,19 +75,36 @@ public sealed class FileIconColorConverter : IValueConverter
 {
     public static readonly FileIconColorConverter Instance = new();
 
-    private static readonly Brush FolderBrush = new SolidColorBrush(Color.FromRgb(0xDC, 0xB8, 0x6C)); // amber
-    private static readonly Brush FileBrush   = new SolidColorBrush(Color.FromRgb(0x9C, 0xDC, 0xFE)); // light-blue
+    private static readonly Brush FolderBrushDark = new SolidColorBrush(Color.FromRgb(0xDC, 0xB8, 0x6C));
+    private static readonly Brush FileBrushDark   = new SolidColorBrush(Color.FromRgb(0x9C, 0xDC, 0xFE));
+    private static readonly Brush FolderBrushLight = new SolidColorBrush(Color.FromRgb(0xC4, 0x9A, 0x00));
+    private static readonly Brush FileBrushLight   = new SolidColorBrush(Color.FromRgb(0x1E, 0x88, 0xE5));
 
     static FileIconColorConverter()
     {
-        FolderBrush.Freeze();
-        FileBrush.Freeze();
+        FolderBrushDark.Freeze(); FileBrushDark.Freeze();
+        FolderBrushLight.Freeze(); FileBrushLight.Freeze();
     }
 
     public object Convert(object value, Type _, object __, CultureInfo ___)
-        => value is true ? FolderBrush : FileBrush;
+    {
+        var isLight = IsLightTheme();
+        if (value is true)
+            return isLight ? FolderBrushLight : FolderBrushDark;
+        return isLight ? FileBrushLight : FileBrushDark;
+    }
 
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+
+    internal static bool IsLightTheme()
+    {
+        if (Application.Current.Resources["AppBg"] is SolidColorBrush bg)
+        {
+            var c = bg.Color;
+            return (0.299 * c.R + 0.587 * c.G + 0.114 * c.B) > 128;
+        }
+        return false;
+    }
 }
 
 /// <summary>int? ExitCode → green/red/gray brush for the history panel badge.</summary>
@@ -121,16 +134,24 @@ public sealed class ShellPromptColorConverter : IValueConverter
 {
     public static readonly ShellPromptColorConverter Instance = new();
 
-    private static readonly Brush PsBrush  = new SolidColorBrush(Color.FromRgb(0x2D, 0xCF, 0xFF)); // cyan
-    private static readonly Brush CmdBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00)); // yellow
+    private static readonly Brush PsBrushDark  = new SolidColorBrush(Color.FromRgb(0x2D, 0xCF, 0xFF));
+    private static readonly Brush CmdBrushDark = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00));
+    private static readonly Brush PsBrushLight  = new SolidColorBrush(Color.FromRgb(0x00, 0x6B, 0xBD));
+    private static readonly Brush CmdBrushLight = new SolidColorBrush(Color.FromRgb(0xB8, 0x86, 0x00));
 
     static ShellPromptColorConverter()
     {
-        PsBrush.Freeze(); CmdBrush.Freeze();
+        PsBrushDark.Freeze(); CmdBrushDark.Freeze();
+        PsBrushLight.Freeze(); CmdBrushLight.Freeze();
     }
 
     public object Convert(object value, Type _, object __, CultureInfo ___)
-        => value is ShellKind.Cmd ? CmdBrush : PsBrush;
+    {
+        var isLight = FileIconColorConverter.IsLightTheme();
+        return value is ShellKind.Cmd
+            ? (isLight ? CmdBrushLight : CmdBrushDark)
+            : (isLight ? PsBrushLight : PsBrushDark);
+    }
 
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }
@@ -141,23 +162,29 @@ public sealed class SuggestionKindColorConverter : IValueConverter
 {
     public static readonly SuggestionKindColorConverter Instance = new();
 
-    private static readonly Brush HistoryBrush = new SolidColorBrush(Color.FromRgb(0x9B, 0xDB, 0xFF));  // light blue
-    private static readonly Brush FsBrush      = new SolidColorBrush(Color.FromRgb(0xDC, 0xB8, 0x6C));  // amber
-    private static readonly Brush BangBrush    = new SolidColorBrush(Color.FromRgb(0xC5, 0x86, 0xC0));  // purple
+    private static readonly Brush HistoryBrushDark = new SolidColorBrush(Color.FromRgb(0x9B, 0xDB, 0xFF));
+    private static readonly Brush FsBrushDark      = new SolidColorBrush(Color.FromRgb(0xDC, 0xB8, 0x6C));
+    private static readonly Brush BangBrushDark    = new SolidColorBrush(Color.FromRgb(0xC5, 0x86, 0xC0));
+    private static readonly Brush HistoryBrushLight = new SolidColorBrush(Color.FromRgb(0x15, 0x65, 0xC0));
+    private static readonly Brush FsBrushLight      = new SolidColorBrush(Color.FromRgb(0xC4, 0x9A, 0x00));
+    private static readonly Brush BangBrushLight    = new SolidColorBrush(Color.FromRgb(0x7B, 0x1F, 0xA2));
 
     static SuggestionKindColorConverter()
     {
-        HistoryBrush.Freeze(); FsBrush.Freeze(); BangBrush.Freeze();
+        HistoryBrushDark.Freeze(); FsBrushDark.Freeze(); BangBrushDark.Freeze();
+        HistoryBrushLight.Freeze(); FsBrushLight.Freeze(); BangBrushLight.Freeze();
     }
 
     public object Convert(object value, Type _, object __, CultureInfo ___)
-        => value switch
+    {
+        var isLight = FileIconColorConverter.IsLightTheme();
+        return value switch
         {
-            SuggestionKind.FileSystem => FsBrush,
-            SuggestionKind.BangCommand => BangBrush,
-            _ => HistoryBrush
+            SuggestionKind.FileSystem => isLight ? FsBrushLight : FsBrushDark,
+            SuggestionKind.BangCommand => isLight ? BangBrushLight : BangBrushDark,
+            _ => isLight ? HistoryBrushLight : HistoryBrushDark
         };
-
+    }
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }
 
@@ -264,19 +291,28 @@ public sealed class GitBranchColorConverter : IValueConverter
 {
     public static readonly GitBranchColorConverter Instance = new();
 
-    private static readonly Brush CleanBrush = new SolidColorBrush(Color.FromRgb(0x16, 0xC6, 0x0C));
-    private static readonly Brush DirtyBrush = new SolidColorBrush(Color.FromRgb(0xF9, 0xF1, 0xA5));
-    private static readonly Brush NoBrush    = new SolidColorBrush(Color.FromRgb(0x60, 0x60, 0x60));
+    private static readonly Brush CleanBrushDark = new SolidColorBrush(Color.FromRgb(0x16, 0xC6, 0x0C));
+    private static readonly Brush DirtyBrushDark = new SolidColorBrush(Color.FromRgb(0xF9, 0xF1, 0xA5));
+    private static readonly Brush NoBrushDark    = new SolidColorBrush(Color.FromRgb(0x60, 0x60, 0x60));
+    private static readonly Brush CleanBrushLight = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
+    private static readonly Brush DirtyBrushLight = new SolidColorBrush(Color.FromRgb(0xC4, 0x9A, 0x00));
+    private static readonly Brush NoBrushLight    = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
 
     static GitBranchColorConverter()
     {
-        CleanBrush.Freeze(); DirtyBrush.Freeze(); NoBrush.Freeze();
+        CleanBrushDark.Freeze(); DirtyBrushDark.Freeze(); NoBrushDark.Freeze();
+        CleanBrushLight.Freeze(); DirtyBrushLight.Freeze(); NoBrushLight.Freeze();
     }
 
     public object Convert(object value, Type _, object __, CultureInfo ___)
-        => value is Services.GitBranchInfo info
-            ? (info.IsDirty ? DirtyBrush : CleanBrush)
-            : NoBrush;
+    {
+        var isLight = FileIconColorConverter.IsLightTheme();
+        if (value is Services.GitBranchInfo info)
+            return info.IsDirty
+                ? (isLight ? DirtyBrushLight : DirtyBrushDark)
+                : (isLight ? CleanBrushLight : CleanBrushDark);
+        return isLight ? NoBrushLight : NoBrushDark;
+    }
 
     public object ConvertBack(object v, Type t, object p, CultureInfo c)
         => throw new NotSupportedException();

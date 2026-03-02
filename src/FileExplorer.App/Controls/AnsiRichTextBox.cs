@@ -33,11 +33,19 @@ public class AnsiRichTextBox : RichTextBox
             nameof(DefaultForegroundColor),
             typeof(string),
             typeof(AnsiRichTextBox),
-            new PropertyMetadata("#CCCCCC"));
+            new PropertyMetadata(null));
 
     public string DefaultForegroundColor
     {
-        get => (string)GetValue(DefaultForegroundColorProperty);
+        get
+        {
+            var val = (string)GetValue(DefaultForegroundColorProperty);
+            if (val != null) return val;
+            // Fall back to theme TextFg color
+            if (Application.Current.Resources["TextFg"] is SolidColorBrush b)
+                return b.Color.ToString();
+            return "#CCCCCC";
+        }
         set => SetValue(DefaultForegroundColorProperty, value);
     }
 

@@ -107,15 +107,15 @@
                     Tag="{Binding}">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background"  Value="#2D2D30"/>
+                        <Setter Property="Background"  Value="{DynamicResource HeaderBg}"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                <Setter Property="Background"  Value="#252526"/>
-                                <Setter Property="BorderBrush" Value="#007ACC"/>
+                                <Setter Property="Background"  Value="{DynamicResource PaneBg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource ActivePaneBorder}"/>
                             </DataTrigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#2A2D2E"/>
+                                <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -135,10 +135,10 @@
                         <iconPacks:PackIconMaterial Kind="Close" Width="8" Height="8">
                             <iconPacks:PackIconMaterial.Style>
                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                    <Setter Property="Foreground" Value="#555"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                            <Setter Property="Foreground" Value="#888"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource SubTextFg}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -149,7 +149,7 @@
                                Text="{Binding Header}" TextTrimming="CharacterEllipsis" FontSize="11.5">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="#777"/>
+                                <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -178,7 +178,7 @@
                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                    <Setter Property="Foreground" Value="#DCB86C"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource FolderNameFg}"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                 </DataTrigger>
                                 <MultiDataTrigger>
@@ -209,7 +209,7 @@
                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                    <Setter Property="Foreground" Value="#DCB86C"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource FolderNameFg}"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                 </DataTrigger>
                                 <MultiDataTrigger>
@@ -240,7 +240,7 @@
                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                    <Setter Property="Foreground" Value="#DCB86C"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource FolderNameFg}"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                 </DataTrigger>
                                 <MultiDataTrigger>
@@ -271,7 +271,7 @@
                                 <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                        <Setter Property="Foreground" Value="#DCB86C"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource FolderNameFg}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
                                     <MultiDataTrigger>
@@ -323,7 +323,7 @@
 
         <!-- F-key toolbar button -->
         <Style x:Key="FKeyButton" TargetType="Button">
-            <Setter Property="Background"     Value="#2D2D30"/>
+            <Setter Property="Background"     Value="{DynamicResource HeaderBg}"/>
             <Setter Property="Foreground"     Value="{DynamicResource TextFg}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush"    Value="{DynamicResource BorderBrush}"/>
@@ -342,7 +342,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#3C3C3C"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonHoverBg}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
@@ -623,7 +623,7 @@
                                                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                                                                <Setter Property="Foreground" Value="#DCB86C"/>
+                                                                                <Setter Property="Foreground" Value="{DynamicResource FolderNameFg}"/>
                                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                                             </DataTrigger>
                                                                             <MultiDataTrigger>
@@ -871,7 +871,7 @@
                                                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                                                                <Setter Property="Foreground" Value="#DCB86C"/>
+                                                                                <Setter Property="Foreground" Value="{DynamicResource FolderNameFg}"/>
                                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                                             </DataTrigger>
                                                                             <MultiDataTrigger>
@@ -1013,10 +1013,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Terminal">
                                                     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter Property="Background" Value="#252526"/>
+                                                    <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
                                                 </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#2A2D2E"/>
+                                                    <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1026,7 +1026,7 @@
                                                                     VerticalAlignment="Center" Margin="0,0,6,0">
                                             <iconPacks:PackIconMaterial.Style>
                                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                                    <Setter Property="Foreground" Value="#777"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Terminal">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1038,7 +1038,7 @@
                                         <TextBlock Text="Terminal" FontSize="11.5" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#777"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Terminal">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1060,10 +1060,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActiveBottomTab}" Value="GitHistory">
                                                     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter Property="Background" Value="#252526"/>
+                                                    <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
                                                 </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#2A2D2E"/>
+                                                    <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1073,7 +1073,7 @@
                                                                     VerticalAlignment="Center" Margin="0,0,6,0">
                                             <iconPacks:PackIconMaterial.Style>
                                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                                    <Setter Property="Foreground" Value="#777"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="GitHistory">
                                                             <Setter Property="Foreground" Value="#F97316"/>
@@ -1085,7 +1085,7 @@
                                         <TextBlock Text="Git History" FontSize="11.5" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#777"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="GitHistory">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1114,10 +1114,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Git">
                                                     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter Property="Background" Value="#252526"/>
+                                                    <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
                                                 </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#2A2D2E"/>
+                                                    <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1127,10 +1127,10 @@
                                                                     VerticalAlignment="Center" Margin="0,0,6,0">
                                             <iconPacks:PackIconMaterial.Style>
                                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                                    <Setter Property="Foreground" Value="#777"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Git">
-                                                            <Setter Property="Foreground" Value="#4EC94E"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DiffAddedFg}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -1139,7 +1139,7 @@
                                         <TextBlock Text="Git" FontSize="11.5" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#777"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Git">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1228,16 +1228,16 @@
                                                 Tag="{Binding}">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#2D2D30"/>
+                                                    <Setter Property="Background" Value="{DynamicResource HeaderBg}"/>
                                                     <Setter Property="BorderThickness" Value="0,0,0,2"/>
                                                     <Setter Property="BorderBrush" Value="Transparent"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                            <Setter Property="Background" Value="#252526"/>
+                                                            <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
                                                             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                                         </DataTrigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A2D2E"/>
+                                                            <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -1264,7 +1264,7 @@
                                                                TextTrimming="CharacterEllipsis">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="#777"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
                                                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1352,12 +1352,12 @@
                                     Padding="10,6">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Left" Text="(reverse-i-search)" FontSize="11"
-                                               Foreground="#61D6D6" VerticalAlignment="Center" Margin="0,0,8,0"
+                                               Foreground="{DynamicResource HistorySearchLabelFg}" VerticalAlignment="Center" Margin="0,0,8,0"
                                                FontFamily="Cascadia Code,Consolas"/>
                                     <TextBlock DockPanel.Dock="Right"
                                                Text="{Binding ActiveTab.HistorySearchResult, FallbackValue=''}"
                                                FontFamily="Cascadia Code,Consolas" FontSize="12"
-                                               Foreground="#F9F1A5" VerticalAlignment="Center" Margin="8,0,0,0"
+                                               Foreground="{DynamicResource HistorySearchResultFg}" VerticalAlignment="Center" Margin="8,0,0,0"
                                                TextTrimming="CharacterEllipsis"/>
                                     <TextBox x:Name="HistorySearchBox"
                                              Text="{Binding ActiveTab.HistorySearchText, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
@@ -1576,9 +1576,9 @@
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <Border Width="24" Height="24" CornerRadius="12"
-                                                                Background="#2D4A2D" HorizontalAlignment="Center">
+                                                                Background="{DynamicResource GitAvatarBg}" HorizontalAlignment="Center">
                                                             <TextBlock Text="{Binding AuthorInitial}" FontSize="11" FontWeight="Bold"
-                                                                       Foreground="#7FCC7F" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                       Foreground="{DynamicResource GitAvatarFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                         </Border>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
@@ -1588,7 +1588,7 @@
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding ShortHash}" FontFamily="Cascadia Code,Consolas" FontSize="11"
-                                                                   Foreground="#569CD6" TextTrimming="CharacterEllipsis"/>
+                                                                   Foreground="{DynamicResource HashFg}" TextTrimming="CharacterEllipsis"/>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>
@@ -1644,7 +1644,7 @@
                                             <TextBlock FontSize="11" Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center">
                                                 <Run Text="Commit " FontWeight="SemiBold"/>
                                                 <Run Text="{Binding SelectedEntry.ShortHash, Mode=OneWay, FallbackValue=''}"
-                                                     Foreground="#569CD6" FontFamily="Cascadia Code,Consolas"/>
+                                                     Foreground="{DynamicResource HashFg}" FontFamily="Cascadia Code,Consolas"/>
                                                 <Run Text=" — Double-click a file to compare" Foreground="{DynamicResource SubTextFg}" FontSize="10"/>
                                             </TextBlock>
                                         </DockPanel>
@@ -1687,7 +1687,7 @@
                                                                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBg}"/>
                                                                         </Trigger>
                                                                         <Trigger Property="IsSelected" Value="True">
-                                                                            <Setter TargetName="Bd" Property="Background" Value="#2D4158"/>
+                                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelBg}"/>
                                                                         </Trigger>
                                                                     </ControlTemplate.Triggers>
                                                                 </ControlTemplate>
@@ -1754,7 +1754,7 @@
                                                      FontFamily="Cascadia Code,Consolas"/>
                                                 <Run Text=" — "/>
                                                 <Run Text="{Binding SelectedEntry.ShortHash, Mode=OneWay, FallbackValue=''}"
-                                                     Foreground="#569CD6" FontFamily="Cascadia Code,Consolas"/>
+                                                     Foreground="{DynamicResource HashFg}" FontFamily="Cascadia Code,Consolas"/>
                                             </TextBlock>
                                         </DockPanel>
                                     </Border>
@@ -1769,10 +1769,10 @@
 
                                         <!-- Old (parent commit) -->
                                         <DockPanel Grid.Column="0">
-                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="#2D1515">
-                                                <TextBlock FontSize="10" Foreground="#F14C4C" FontWeight="SemiBold">
+                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="{DynamicResource DiffRemovedHeaderBg}">
+                                                <TextBlock FontSize="10" Foreground="{DynamicResource DiffRemovedFg}" FontWeight="SemiBold">
                                                     <Run Text="Before"/>
-                                                    <Run Text=" (parent commit)" FontWeight="Normal" Foreground="#884444"/>
+                                                    <Run Text=" (parent commit)" FontWeight="Normal" Foreground="{DynamicResource DiffRemovedSubFg}"/>
                                                 </TextBlock>
                                             </Border>
                                             <ctrl:DiffRichTextBox DiffLines="{Binding DiffOldLines}" SharedScrollBar="{Binding ElementName=FileDiffMiddleScroll}"/>
@@ -1783,10 +1783,10 @@
 
                                         <!-- New (this commit) -->
                                         <DockPanel Grid.Column="2">
-                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="#152D15">
-                                                <TextBlock FontSize="10" Foreground="#4EC94E" FontWeight="SemiBold">
+                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="{DynamicResource DiffAddedHeaderBg}">
+                                                <TextBlock FontSize="10" Foreground="{DynamicResource DiffAddedFg}" FontWeight="SemiBold">
                                                     <Run Text="After"/>
-                                                    <Run Text=" (this commit)" FontWeight="Normal" Foreground="#448844"/>
+                                                    <Run Text=" (this commit)" FontWeight="Normal" Foreground="{DynamicResource DiffAddedSubFg}"/>
                                                 </TextBlock>
                                             </Border>
                                             <ctrl:DiffRichTextBox DiffLines="{Binding DiffNewLines}" SharedScrollBar="{Binding ElementName=FileDiffMiddleScroll}"/>
@@ -1855,12 +1855,12 @@
                                             </Button>
                                         </StackPanel>
                                         <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="SourcePull" Width="13" Height="13"
-                                                                    Foreground="#4EC94E" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                                    Foreground="{DynamicResource DiffAddedFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                         <TextBlock FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
                                                    Foreground="{DynamicResource SubTextFg}">
                                             <Run Text="Source Control"/>
                                             <Run Text=" — "/>
-                                            <Run Text="{Binding CurrentBranch, Mode=OneWay, FallbackValue=''}" Foreground="#569CD6"
+                                            <Run Text="{Binding CurrentBranch, Mode=OneWay, FallbackValue=''}" Foreground="{DynamicResource HashFg}"
                                                  FontFamily="Cascadia Code,Consolas"/>
                                         </TextBlock>
                                     </DockPanel>
@@ -1873,14 +1873,14 @@
                                 </Border>
 
                                 <!-- Status message bar -->
-                                <Border DockPanel.Dock="Top" Padding="8,4" Background="#1E2D1E"
+                                <Border DockPanel.Dock="Top" Padding="8,4" Background="{DynamicResource GitStatusBg}"
                                         Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <DockPanel>
                                         <Button DockPanel.Dock="Right" Command="{Binding DismissStatusCommand}"
                                                 Style="{StaticResource NavButton}" Width="16" Height="16">
                                             <iconPacks:PackIconMaterial Kind="Close" Width="7" Height="7"/>
                                         </Button>
-                                        <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="#73C991"
+                                        <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{DynamicResource GitStatusFg}"
                                                    VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                                    FontFamily="Cascadia Code,Consolas"/>
                                     </DockPanel>
@@ -2122,8 +2122,8 @@
 
                                         <!-- Old (HEAD) -->
                                         <DockPanel Grid.Column="0">
-                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="#2D1515">
-                                                <TextBlock Text="HEAD (old)" FontSize="10" Foreground="#F14C4C" FontWeight="SemiBold"/>
+                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="{DynamicResource DiffRemovedHeaderBg}">
+                                                <TextBlock Text="HEAD (old)" FontSize="10" Foreground="{DynamicResource DiffRemovedFg}" FontWeight="SemiBold"/>
                                             </Border>
                                             <ctrl:DiffRichTextBox DiffLines="{Binding DiffOldLines}" SharedScrollBar="{Binding ElementName=GitDiffMiddleScroll}"/>
                                         </DockPanel>
@@ -2133,8 +2133,8 @@
 
                                         <!-- New (Working Tree / Index) -->
                                         <DockPanel Grid.Column="2">
-                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="#152D15">
-                                                <TextBlock Text="Working Tree (new)" FontSize="10" Foreground="#4EC94E" FontWeight="SemiBold"/>
+                                            <Border DockPanel.Dock="Top" Padding="8,3" Background="{DynamicResource DiffAddedHeaderBg}">
+                                                <TextBlock Text="Working Tree (new)" FontSize="10" Foreground="{DynamicResource DiffAddedFg}" FontWeight="SemiBold"/>
                                             </Border>
                                             <ctrl:DiffRichTextBox DiffLines="{Binding DiffNewLines}" SharedScrollBar="{Binding ElementName=GitDiffMiddleScroll}"/>
                                         </DockPanel>
@@ -2173,15 +2173,15 @@
                                             <Style TargetType="ListBoxItem">
                                                 <Setter Property="Padding" Value="8,3"/>
                                                 <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="Foreground" Value="#D4D4D4"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                                 <Style.Triggers>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter Property="Background" Value="#2D4158"/>
-                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                        <Setter Property="Background" Value="{DynamicResource SelBg}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                                                     </Trigger>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#2A2A3A"/>
+                                                        <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -2252,7 +2252,7 @@
                                         Visibility="{Binding TerminalPanel.ActiveTab.GitBranch, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
                                     <Border.Style>
                                         <Style TargetType="Border">
-                                            <Setter Property="Background" Value="#1E2D1E"/>
+                                            <Setter Property="Background" Value="{DynamicResource GitStatusBg}"/>
                                         </Style>
                                     </Border.Style>
                                     <StackPanel Orientation="Horizontal">

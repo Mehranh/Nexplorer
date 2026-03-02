@@ -43,8 +43,8 @@
 
             <!-- Left file -->
             <DockPanel Grid.Column="0">
-                <Border DockPanel.Dock="Top" Padding="8,3" Background="#2D1515">
-                    <TextBlock x:Name="LeftLabel" FontSize="10" Foreground="#F14C4C" FontWeight="SemiBold"
+                <Border DockPanel.Dock="Top" Padding="8,3" Background="{DynamicResource DiffRemovedHeaderBg}">
+                    <TextBlock x:Name="LeftLabel" FontSize="10" Foreground="{DynamicResource DiffRemovedFg}" FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"/>
                 </Border>
                 <ctrl:DiffRichTextBox x:Name="LeftDiff" SharedScrollBar="{Binding ElementName=MiddleScroll}"/>
@@ -55,8 +55,8 @@
 
             <!-- Right file -->
             <DockPanel Grid.Column="2">
-                <Border DockPanel.Dock="Top" Padding="8,3" Background="#152D15">
-                    <TextBlock x:Name="RightLabel" FontSize="10" Foreground="#4EC94E" FontWeight="SemiBold"
+                <Border DockPanel.Dock="Top" Padding="8,3" Background="{DynamicResource DiffAddedHeaderBg}">
+                    <TextBlock x:Name="RightLabel" FontSize="10" Foreground="{DynamicResource DiffAddedFg}" FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"/>
                 </Border>
                 <ctrl:DiffRichTextBox x:Name="RightDiff" SharedScrollBar="{Binding ElementName=MiddleScroll}"/>

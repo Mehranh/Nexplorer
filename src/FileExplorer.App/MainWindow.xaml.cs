@@ -14,23 +14,28 @@ namespace FileExplorer.App;
 public partial class MainWindow : Window
 {
 
-    // ── Dark title bar via DWM ──────────────────────────────────────────
+    // ── Theme-aware title bar via DWM ──────────────────────────────────
     [DllImport("dwmapi.dll", PreserveSig = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
     private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
     private const int DWMWA_CAPTION_COLOR = 35;
 
-    private void ApplyDarkTitleBar()
+    private void ApplyTitleBarTheme()
     {
         var hwnd = new WindowInteropHelper(this).Handle;
         if (hwnd == IntPtr.Zero) return;
 
-        int darkMode = 1;
+        var isLight = Application.Current.Resources["AppBg"] is SolidColorBrush bg
+            && (0.299 * bg.Color.R + 0.587 * bg.Color.G + 0.114 * bg.Color.B) > 128;
+
+        int darkMode = isLight ? 0 : 1;
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
 
-        // Paint the caption background to match the app
-        int captionColor = 0x001C1C1C; // BGR format: #1C1C1C
+        // Paint the caption background to match the app (BGR format)
+        var appBg = (Application.Current.Resources["AppBg"] as SolidColorBrush)?.Color
+                    ?? Color.FromRgb(0x1C, 0x1C, 0x1C);
+        int captionColor = appBg.R | (appBg.G << 8) | (appBg.B << 16);
         DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
     }
 
@@ -39,8 +44,11 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = new MainViewModel();
 
-        // Apply dark title bar once the window handle is available
-        SourceInitialized += (_, _) => ApplyDarkTitleBar();
+        // Apply title bar theme once the window handle is available
+        SourceInitialized += (_, _) => ApplyTitleBarTheme();
+
+        // Re-apply title bar when theme changes
+        App.SettingsService.SettingsChanged += _ => Dispatcher.Invoke(ApplyTitleBarTheme);
 
         // Subscribe to terminal panel output changes for auto-scroll
         if (Vm.TerminalPanel.ActiveTab is not null)
@@ -486,7 +494,7 @@ public partial class MainWindow : Window
 
         if (item is null)
         {
-            panel.Children.Add(new TextBlock { Text = "No selection", Foreground = Brushes.Gray, FontStyle = FontStyles.Italic });
+            panel.Children.Add(new TextBlock { Text = "No selection", Foreground = Application.Current.Resources["SubTextFg"] as Brush ?? Brushes.Gray, FontStyle = FontStyles.Italic });
             return;
         }
 
@@ -495,7 +503,7 @@ public partial class MainWindow : Window
         {
             Text       = item.Name,
             FontWeight = FontWeights.SemiBold,
-            Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
+            Foreground = Application.Current.Resources["TextFg"] as Brush ?? Brushes.Black,
             TextWrapping = TextWrapping.Wrap,
             Margin     = new Thickness(0, 0, 0, 6),
         });
@@ -542,7 +550,7 @@ public partial class MainWindow : Window
 
                 panel.Children.Add(MakeInfoLine("Dimensions", $"{bi.PixelWidth} × {bi.PixelHeight}"));
             }
-            catch { panel.Children.Add(new TextBlock { Text = "Cannot load image", Foreground = Brushes.Gray }); }
+            catch { panel.Children.Add(new TextBlock { Text = "Cannot load image", Foreground = Application.Current.Resources["SubTextFg"] as Brush ?? Brushes.Gray }); }
             return;
         }
 
@@ -562,7 +570,7 @@ public partial class MainWindow : Window
                     Text             = preview,
                     IsReadOnly       = true,
                     Background       = Brushes.Transparent,
-                    Foreground       = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)),
+                    Foreground       = Application.Current.Resources["TextFg"] as Brush ?? Brushes.Black,
                     FontFamily       = new FontFamily("Cascadia Code,Consolas,Courier New"),
                     FontSize         = 10.5,
                     TextWrapping     = TextWrapping.Wrap,
@@ -593,7 +601,7 @@ public partial class MainWindow : Window
             panel.Children.Add(new TextBlock
             {
                 Text = "Hex Preview",
-                Foreground = new SolidColorBrush(Color.FromRgb(0x85, 0x85, 0x85)),
+                Foreground = Application.Current.Resources["SubTextFg"] as Brush ?? Brushes.Gray,
                 FontWeight = FontWeights.SemiBold,
                 FontSize   = 10,
                 Margin     = new Thickness(0, 8, 0, 4),
@@ -604,7 +612,7 @@ public partial class MainWindow : Window
                 Text            = hex.ToString(),
                 IsReadOnly      = true,
                 Background      = Brushes.Transparent,
-                Foreground      = new SolidColorBrush(Color.FromRgb(0x80, 0xC0, 0x80)),
+                Foreground      = Application.Current.Resources["DiffAddedFg"] as Brush ?? Brushes.Green,
                 FontFamily      = new FontFamily("Cascadia Code,Consolas,Courier New"),
                 FontSize        = 9,
                 TextWrapping    = TextWrapping.Wrap,
@@ -618,7 +626,7 @@ public partial class MainWindow : Window
 
     private static TextBlock MakeInfoLine(string label, string value) => new()
     {
-        Foreground  = new SolidColorBrush(Color.FromRgb(0x85, 0x85, 0x85)),
+        Foreground  = Application.Current.Resources["SubTextFg"] as Brush ?? Brushes.Gray,
         FontSize    = 10.5,
         Margin      = new Thickness(0, 1, 0, 1),
         Inlines     =

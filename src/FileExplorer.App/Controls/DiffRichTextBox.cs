@@ -18,10 +18,6 @@ public class DiffRichTextBox : RichTextBox
 {
     private static readonly Brush AddedBg = new SolidColorBrush(Color.FromArgb(40, 78, 201, 78));
     private static readonly Brush RemovedBg = new SolidColorBrush(Color.FromArgb(40, 241, 76, 76));
-    private static readonly Brush AddedFg = new SolidColorBrush(Color.FromRgb(0x73, 0xC9, 0x91));
-    private static readonly Brush RemovedFg = new SolidColorBrush(Color.FromRgb(0xF1, 0x8C, 0x8C));
-    private static readonly Brush UnchangedFg = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
-    private static readonly Brush LineNumFg = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55));
     private static readonly Brush EmptyBg;
 
     // Synchronized scrolling support
@@ -59,13 +55,14 @@ public class DiffRichTextBox : RichTextBox
     {
         AddedBg.Freeze();
         RemovedBg.Freeze();
-        AddedFg.Freeze();
-        RemovedFg.Freeze();
-        UnchangedFg.Freeze();
-        LineNumFg.Freeze();
         EmptyBg = new SolidColorBrush(Color.FromArgb(15, 128, 128, 128));
         EmptyBg.Freeze();
     }
+
+    private static Brush GetAddedFg() => Application.Current.Resources["DiffAddedFg"] as Brush ?? Brushes.Green;
+    private static Brush GetRemovedFg() => Application.Current.Resources["DiffRemovedFg"] as Brush ?? Brushes.Red;
+    private static Brush GetUnchangedFg() => Application.Current.Resources["DiffUnchangedFg"] as Brush ?? Brushes.Gray;
+    private static Brush GetLineNumFg() => Application.Current.Resources["DiffLineNumFg"] as Brush ?? Brushes.DarkGray;
 
     public static readonly DependencyProperty DiffLinesProperty =
         DependencyProperty.Register(
@@ -86,7 +83,7 @@ public class DiffRichTextBox : RichTextBox
         IsReadOnlyCaretVisible = false;
         BorderThickness = new Thickness(0);
         Padding = new Thickness(0);
-        Background = new SolidColorBrush(Color.FromRgb(0x1A, 0x1A, 0x1A));
+        SetResourceReference(BackgroundProperty, "DiffBg");
         FontFamily = new FontFamily("Cascadia Code,Consolas,Courier New");
         FontSize = 11;
         HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
@@ -281,22 +278,22 @@ public class DiffRichTextBox : RichTextBox
 
             // Line number
             var lineNum = line.LineNumber?.ToString("D4") ?? "    ";
-            para.Inlines.Add(new Run(lineNum + "  ") { Foreground = LineNumFg });
+            para.Inlines.Add(new Run(lineNum + "  ") { Foreground = GetLineNumFg() });
 
             switch (line.Kind)
             {
                 case DiffLineKind.Added:
                     para.Background = AddedBg;
-                    para.Inlines.Add(new Run(line.Text) { Foreground = AddedFg });
+                    para.Inlines.Add(new Run(line.Text) { Foreground = GetAddedFg() });
                     break;
                 case DiffLineKind.Removed:
                     para.Background = RemovedBg;
-                    para.Inlines.Add(new Run(line.Text) { Foreground = RemovedFg });
+                    para.Inlines.Add(new Run(line.Text) { Foreground = GetRemovedFg() });
                     break;
                 default:
                     if (string.IsNullOrEmpty(line.Text) && line.LineNumber is null)
                         para.Background = EmptyBg;
-                    para.Inlines.Add(new Run(line.Text) { Foreground = UnchangedFg });
+                    para.Inlines.Add(new Run(line.Text) { Foreground = GetUnchangedFg() });
                     break;
             }
 

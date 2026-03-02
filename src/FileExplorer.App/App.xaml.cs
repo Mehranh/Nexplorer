@@ -90,6 +90,24 @@ public partial class App : Application
             SetBrush(res, "InactiveTextFg",  "#999999");
             SetBrush(res, "DangerBorder",    "#D44040");
             SetBrush(res, "DangerHoverBg",   "#F5D0D0");
+
+            SetBrush(res, "DiffBg",              "#FAFAFA");
+            SetBrush(res, "DiffAddedHeaderBg",   "#D4EDDA");
+            SetBrush(res, "DiffRemovedHeaderBg", "#F8D7DA");
+            SetBrush(res, "DiffAddedFg",         "#2E7D32");
+            SetBrush(res, "DiffRemovedFg",       "#C62828");
+            SetBrush(res, "DiffAddedSubFg",      "#66BB6A");
+            SetBrush(res, "DiffRemovedSubFg",    "#EF5350");
+            SetBrush(res, "DiffUnchangedFg",     "#333333");
+            SetBrush(res, "DiffLineNumFg",       "#999999");
+            SetBrush(res, "GitStatusBg",         "#E8F5E9");
+            SetBrush(res, "GitStatusFg",         "#2E7D32");
+            SetBrush(res, "GitAvatarBg",         "#C8E6C9");
+            SetBrush(res, "GitAvatarFg",         "#388E3C");
+            SetBrush(res, "FolderNameFg",        "#C49A00");
+            SetBrush(res, "HashFg",              "#1565C0");
+            SetBrush(res, "HistorySearchLabelFg", "#00838F");
+            SetBrush(res, "HistorySearchResultFg", "#F57F17");
         }
         else
         {
@@ -114,6 +132,24 @@ public partial class App : Application
             SetBrush(res, "InactiveTextFg",  "#777777");
             SetBrush(res, "DangerBorder",    "#8B3030");
             SetBrush(res, "DangerHoverBg",   "#5A2020");
+
+            SetBrush(res, "DiffBg",              "#1A1A1A");
+            SetBrush(res, "DiffAddedHeaderBg",   "#152D15");
+            SetBrush(res, "DiffRemovedHeaderBg", "#2D1515");
+            SetBrush(res, "DiffAddedFg",         "#4EC94E");
+            SetBrush(res, "DiffRemovedFg",       "#F14C4C");
+            SetBrush(res, "DiffAddedSubFg",      "#448844");
+            SetBrush(res, "DiffRemovedSubFg",    "#884444");
+            SetBrush(res, "DiffUnchangedFg",     "#AAAAAA");
+            SetBrush(res, "DiffLineNumFg",       "#555555");
+            SetBrush(res, "GitStatusBg",         "#1E2D1E");
+            SetBrush(res, "GitStatusFg",         "#73C991");
+            SetBrush(res, "GitAvatarBg",         "#2D4A2D");
+            SetBrush(res, "GitAvatarFg",         "#7FCC7F");
+            SetBrush(res, "FolderNameFg",        "#DCB86C");
+            SetBrush(res, "HashFg",              "#569CD6");
+            SetBrush(res, "HistorySearchLabelFg", "#61D6D6");
+            SetBrush(res, "HistorySearchResultFg", "#F9F1A5");
         }
     }
 
