@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
+  "version": "1.0.8",
   "downloadUrl": "https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi",
-  "releaseNotes": "Full light mode theme support — fixed all hardcoded dark colors across UI."
+  "releaseNotes": "Renamed solution and projects from FileExplorer to Nexplorer."
 }
