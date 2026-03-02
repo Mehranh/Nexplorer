@@ -32,6 +32,9 @@
             <MenuItem Header="Open With"      Command="{Binding OpenWithCommand}">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="ApplicationEditOutline" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
+            <MenuItem Header="Quick Edit"    Click="QuickEdit_Click"               InputGestureText="F3">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FileEditOutline" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+            </MenuItem>
             <Separator/>
             <MenuItem Header="Cut"            Command="{Binding CutSelectedCommand}"     InputGestureText="Ctrl+X">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="ContentCut" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
@@ -100,15 +103,15 @@
                     Tag="{Binding}">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background"  Value="{DynamicResource HeaderBg}"/>
+                        <Setter Property="Background"  Value="#2D2D30"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                <Setter Property="Background"  Value="{DynamicResource PaneBg}"/>
-                                <Setter Property="BorderBrush" Value="{DynamicResource ActivePaneBorder}"/>
+                                <Setter Property="Background"  Value="#252526"/>
+                                <Setter Property="BorderBrush" Value="#007ACC"/>
                             </DataTrigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                <Setter Property="Background" Value="#2A2D2E"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -128,10 +131,10 @@
                         <iconPacks:PackIconMaterial Kind="Close" Width="8" Height="8">
                             <iconPacks:PackIconMaterial.Style>
                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                    <Setter Property="Foreground" Value="#555"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource SubTextFg}"/>
+                                            <Setter Property="Foreground" Value="#888"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -142,7 +145,7 @@
                                Text="{Binding Header}" TextTrimming="CharacterEllipsis" FontSize="11.5">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                <Setter Property="Foreground" Value="#777"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -284,7 +287,7 @@
 
         <!-- F-key toolbar button -->
         <Style x:Key="FKeyButton" TargetType="Button">
-            <Setter Property="Background"     Value="{DynamicResource HeaderBg}"/>
+            <Setter Property="Background"     Value="#2D2D30"/>
             <Setter Property="Foreground"     Value="{DynamicResource TextFg}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush"    Value="{DynamicResource BorderBrush}"/>
@@ -303,7 +306,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonHoverBg}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#3C3C3C"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
@@ -954,10 +957,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Terminal">
                                                     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
+                                                    <Setter Property="Background" Value="#252526"/>
                                                 </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                    <Setter Property="Background" Value="#2A2D2E"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -967,7 +970,7 @@
                                                                     VerticalAlignment="Center" Margin="0,0,6,0">
                                             <iconPacks:PackIconMaterial.Style>
                                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                    <Setter Property="Foreground" Value="#777"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Terminal">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -979,7 +982,7 @@
                                         <TextBlock Text="Terminal" FontSize="11.5" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                    <Setter Property="Foreground" Value="#777"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Terminal">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1001,10 +1004,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActiveBottomTab}" Value="GitHistory">
                                                     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
+                                                    <Setter Property="Background" Value="#252526"/>
                                                 </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                    <Setter Property="Background" Value="#2A2D2E"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1014,7 +1017,7 @@
                                                                     VerticalAlignment="Center" Margin="0,0,6,0">
                                             <iconPacks:PackIconMaterial.Style>
                                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                    <Setter Property="Foreground" Value="#777"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="GitHistory">
                                                             <Setter Property="Foreground" Value="#F97316"/>
@@ -1026,7 +1029,7 @@
                                         <TextBlock Text="Git History" FontSize="11.5" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                    <Setter Property="Foreground" Value="#777"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="GitHistory">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1055,10 +1058,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Git">
                                                     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
+                                                    <Setter Property="Background" Value="#252526"/>
                                                 </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                    <Setter Property="Background" Value="#2A2D2E"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1068,7 +1071,7 @@
                                                                     VerticalAlignment="Center" Margin="0,0,6,0">
                                             <iconPacks:PackIconMaterial.Style>
                                                 <Style TargetType="iconPacks:PackIconMaterial">
-                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                    <Setter Property="Foreground" Value="#777"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Git">
                                                             <Setter Property="Foreground" Value="#4EC94E"/>
@@ -1080,7 +1083,7 @@
                                         <TextBlock Text="Git" FontSize="11.5" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                    <Setter Property="Foreground" Value="#777"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveBottomTab}" Value="Git">
                                                             <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1169,16 +1172,16 @@
                                                 Tag="{Binding}">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="{DynamicResource HeaderBg}"/>
+                                                    <Setter Property="Background" Value="#2D2D30"/>
                                                     <Setter Property="BorderThickness" Value="0,0,0,2"/>
                                                     <Setter Property="BorderBrush" Value="Transparent"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                            <Setter Property="Background" Value="{DynamicResource PaneBg}"/>
+                                                            <Setter Property="Background" Value="#252526"/>
                                                             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                                         </DataTrigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                            <Setter Property="Background" Value="#2A2D2E"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -1205,7 +1208,7 @@
                                                                TextTrimming="CharacterEllipsis">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="{DynamicResource InactiveTextFg}"/>
+                                                                <Setter Property="Foreground" Value="#777"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
                                                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -1628,7 +1631,7 @@
                                                                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBg}"/>
                                                                         </Trigger>
                                                                         <Trigger Property="IsSelected" Value="True">
-                                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelBg}"/>
+                                                                            <Setter TargetName="Bd" Property="Background" Value="#2D4158"/>
                                                                         </Trigger>
                                                                     </ControlTemplate.Triggers>
                                                                 </ControlTemplate>
@@ -2114,15 +2117,15 @@
                                             <Style TargetType="ListBoxItem">
                                                 <Setter Property="Padding" Value="8,3"/>
                                                 <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                                <Setter Property="Foreground" Value="#D4D4D4"/>
                                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                                 <Style.Triggers>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource SelBg}"/>
-                                                        <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                                        <Setter Property="Background" Value="#2D4158"/>
+                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
                                                     </Trigger>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                        <Setter Property="Background" Value="#2A2A3A"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>

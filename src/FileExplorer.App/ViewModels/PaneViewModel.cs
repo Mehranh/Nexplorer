@@ -81,8 +81,7 @@ public sealed partial class PaneViewModel : ObservableObject
         BeginRenameCommand.NotifyCanExecuteChanged();
         DeleteSelectedCommand.NotifyCanExecuteChanged();
     }
-
-    // ─── View mode ─────────────────────────────────────────────────────────────
+    // ─── View mode ───────────────────────────────────────────────────────────────────
 
     [ObservableProperty] private ViewMode _viewMode = ViewMode.Details;
 
@@ -92,7 +91,6 @@ public sealed partial class PaneViewModel : ObservableObject
         if (Enum.TryParse<ViewMode>(mode, out var parsed))
             ViewMode = parsed;
     }
-
     // ─── Sorting ──────────────────────────────────────────────────────────────
 
     [ObservableProperty] private string _sortColumn    = nameof(FileItemViewModel.Name);

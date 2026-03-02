@@ -298,6 +298,67 @@ public partial class MainWindow : Window
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+    //  QUICK EDIT
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private static readonly HashSet<string> s_quickEditExts = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".txt", ".md", ".json", ".yaml", ".yml", ".xml", ".toml",
+        ".env", ".ini", ".cfg", ".conf", ".config", ".properties",
+        ".csv", ".tsv", ".log",
+        ".cs", ".csx", ".csproj", ".sln", ".props", ".targets",
+        ".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs",
+        ".py", ".rb", ".rs", ".go", ".java", ".kt", ".swift",
+        ".html", ".htm", ".css", ".scss", ".less",
+        ".sh", ".bash", ".ps1", ".psm1", ".bat", ".cmd",
+        ".sql", ".graphql",
+        ".dockerfile", ".gitignore", ".gitattributes", ".editorconfig",
+    };
+
+    private void QuickEdit_Click(object sender, RoutedEventArgs e) => OpenQuickEdit();
+
+    private void OpenQuickEdit()
+    {
+        var selected = Vm.ActivePane.SelectedItem;
+        if (selected is null || selected.IsDirectory) return;
+
+        var ext = Path.GetExtension(selected.FullPath);
+        var name = Path.GetFileName(selected.FullPath);
+
+        // Allow extensionless dotfiles like .gitignore, .editorconfig, Dockerfile
+        bool isEditable = s_quickEditExts.Contains(ext)
+                       || s_quickEditExts.Contains("." + name.ToLowerInvariant())
+                       || string.IsNullOrEmpty(ext);
+
+        if (!isEditable)
+        {
+            MessageBox.Show($"Quick Edit does not support '{ext}' files.",
+                "Quick Edit", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var info = new FileInfo(selected.FullPath);
+        if (info.Length > 5 * 1024 * 1024) // 5 MB limit
+        {
+            MessageBox.Show("File is too large for Quick Edit (max 5 MB).",
+                "Quick Edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            var dlg = new QuickEditWindow(selected.FullPath) { Owner = this };
+            dlg.Show();
+        }
+        catch (Exception ex)
+        {
+            var logPath = Path.Combine(Path.GetTempPath(), "quickedit_error.log");
+            File.WriteAllText(logPath, ex.ToString());
+            MessageBox.Show(ex.ToString(), "Quick Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  SEARCH
     // ═══════════════════════════════════════════════════════════════════════
 
@@ -811,6 +872,10 @@ public partial class MainWindow : Window
             }
             e.Handled = true; return;
         }
+
+        // ── Quick Edit (F3) ──
+        if (e.Key == Key.F3 && !IsTextInputFocused())
+        { OpenQuickEdit(); e.Handled = true; return; }
 
         // ── Preview (F8) ──
         if (e.Key == Key.F8 && !IsTextInputFocused())
