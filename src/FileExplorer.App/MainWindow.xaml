@@ -36,6 +36,9 @@
             <MenuItem Header="Quick Edit"    Click="QuickEdit_Click"               InputGestureText="F3">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FileEditOutline" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
+            <MenuItem Header="Diff Files (L ↔ R)" Click="DiffFiles_Click" InputGestureText="Ctrl+D">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FileCompare" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+            </MenuItem>
             <Separator/>
             <MenuItem Header="Cut"            Command="{Binding CutSelectedCommand}"     InputGestureText="Ctrl+X">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="ContentCut" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>

@@ -317,6 +317,8 @@ public partial class MainWindow : Window
 
     private void QuickEdit_Click(object sender, RoutedEventArgs e) => OpenQuickEdit();
 
+    private void DiffFiles_Click(object sender, RoutedEventArgs e) => OpenFileDiff();
+
     private void OpenQuickEdit()
     {
         var selected = Vm.ActivePane.SelectedItem;
@@ -355,6 +357,63 @@ public partial class MainWindow : Window
             var logPath = Path.Combine(Path.GetTempPath(), "quickedit_error.log");
             File.WriteAllText(logPath, ex.ToString());
             MessageBox.Show(ex.ToString(), "Quick Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  FILE DIFF
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private void OpenFileDiff()
+    {
+        var leftSelected  = Vm.LeftPane.SelectedItem;
+        var rightSelected = Vm.RightPane.SelectedItem;
+
+        if (leftSelected is null || rightSelected is null)
+        {
+            MessageBox.Show("Select one file in the left pane and one in the right pane to compare.",
+                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (leftSelected.IsDirectory || rightSelected.IsDirectory)
+        {
+            MessageBox.Show("File Diff only works with files, not directories.",
+                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var leftExt  = Path.GetExtension(leftSelected.FullPath);
+        var rightExt = Path.GetExtension(rightSelected.FullPath);
+        if (!s_quickEditExts.Contains(leftExt) && !string.IsNullOrEmpty(leftExt))
+        {
+            MessageBox.Show($"File Diff does not support '{leftExt}' files.",
+                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        if (!s_quickEditExts.Contains(rightExt) && !string.IsNullOrEmpty(rightExt))
+        {
+            MessageBox.Show($"File Diff does not support '{rightExt}' files.",
+                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        const long maxSize = 5 * 1024 * 1024;
+        if (new FileInfo(leftSelected.FullPath).Length > maxSize || new FileInfo(rightSelected.FullPath).Length > maxSize)
+        {
+            MessageBox.Show("One of the files is too large for diff (max 5 MB each).",
+                "File Diff", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            var dlg = new FileDiffWindow(leftSelected.FullPath, rightSelected.FullPath) { Owner = this };
+            dlg.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.ToString(), "File Diff Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -876,6 +935,10 @@ public partial class MainWindow : Window
         // ── Quick Edit (F3) ──
         if (e.Key == Key.F3 && !IsTextInputFocused())
         { OpenQuickEdit(); e.Handled = true; return; }
+
+        // ── File Diff (Ctrl+D) ──
+        if (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control && !IsTextInputFocused())
+        { OpenFileDiff(); e.Handled = true; return; }
 
         // ── Preview (F8) ──
         if (e.Key == Key.F8 && !IsTextInputFocused())
