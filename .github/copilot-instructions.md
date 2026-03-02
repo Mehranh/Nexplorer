@@ -379,3 +379,24 @@ Must include:
 * Cancelling navigation stops all background work.
 * Command history persists across restarts.
 * Memory usage remains stable during large folder browsing.
+
+---
+
+# Version Bumping
+
+When bumping the version, update **all** of the following files:
+
+| File | Field | Format |
+|------|-------|--------|
+| `src/Nexplorer.App/Nexplorer.App.csproj` | `<Version>` | `X.Y.Z` |
+| `installer/Package.wxs` | `Version` attribute | `X.Y.Z.0` (4-part) |
+| `docs/version.json` | `"version"` | `"X.Y.Z"` |
+| `docs/index.html` | Version in heading + download link | `vX.Y.Z` |
+| `README.md` | Download link text | `vX.Y.Z` |
+
+### Rules
+
+* All five files must use the **same** Major.Minor.Build values.
+* The installer (`Package.wxs`) requires a 4-part version — always append `.0` as Revision.
+* `docs/version.json` is read by the in-app update checker at runtime — forgetting to update it will cause users to miss the update.
+* Do **not** update version numbers in test files (`UpdateServiceTests.cs`) — those use fixed values for regression coverage.
