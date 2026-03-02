@@ -19,15 +19,15 @@
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
 
     <!-- Icon for Add/Remove Programs -->
-    <Icon Id="NexplorerIcon" SourceFile="..\src\FileExplorer.App\nexplorer.ico" />
+    <Icon Id="NexplorerIcon" SourceFile="..\src\Nexplorer.App\nexplorer.ico" />
     <Property Id="ARPPRODUCTICON" Value="NexplorerIcon" />
 
     <!-- Directory structure -->
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="Nexplorer">
         <Component Id="MainExe" Guid="2DC207EE-8B8C-4860-BEEF-34F39EDFE967">
-          <File Id="FileExplorerAppExe"
-                Source="..\publish\Nexplorer\FileExplorer.App.exe"
+          <File Id="NexplorerAppExe"
+                Source="..\publish\Nexplorer\Nexplorer.App.exe"
                 KeyPath="yes" />
         </Component>
       </Directory>
@@ -39,7 +39,7 @@
         <Shortcut Id="DesktopShortcutLink"
                   Name="Nexplorer"
                   Description="Nexplorer File Explorer"
-                  Target="[INSTALLFOLDER]FileExplorer.App.exe"
+                  Target="[INSTALLFOLDER]Nexplorer.App.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="NexplorerIcon" />
         <RegistryValue Root="HKCU" Key="Software\Nexplorer"
@@ -50,7 +50,7 @@
     <!-- Harvest all remaining files from publish folder -->
     <ComponentGroup Id="PublishedFiles" Directory="INSTALLFOLDER">
       <Files Include="..\publish\Nexplorer\**">
-        <Exclude Files="..\publish\Nexplorer\FileExplorer.App.exe" />
+        <Exclude Files="..\publish\Nexplorer\Nexplorer.App.exe" />
       </Files>
     </ComponentGroup>
 

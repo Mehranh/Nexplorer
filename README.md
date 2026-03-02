@@ -24,13 +24,13 @@ Every line of code, UI layout, and architectural decision in this project was ge
 ## Build from Source
 
 ```bash
-dotnet build src/FileExplorer.App/FileExplorer.App.csproj
+dotnet build src/Nexplorer.App/Nexplorer.App.csproj
 ```
 
 ## Run Tests
 
 ```bash
-dotnet test tests/FileExplorer.Tests/FileExplorer.Tests.csproj
+dotnet test tests/Nexplorer.Tests/Nexplorer.Tests.csproj
 ```
 
 ## License
