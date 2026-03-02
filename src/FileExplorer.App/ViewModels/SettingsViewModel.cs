@@ -35,6 +35,9 @@ public sealed partial class SettingsViewModel : ObservableObject
 {
     private readonly ISettingsService _service;
 
+    public string AppVersion { get; } =
+        System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+
     public SettingsViewModel(ISettingsService service)
     {
         _service = service;
@@ -48,6 +51,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             new() { Name = "Appearance",        Icon = "Palette",         Key = "appearance" },
             new() { Name = "Keyboard",          Icon = "Keyboard",        Key = "keyboard" },
             new() { Name = "Advanced",          Icon = "TuneVertical",    Key = "advanced" },
+            new() { Name = "About",             Icon = "InformationOutline", Key = "about" },
         };
 
         _selectedCategory = Categories[0];

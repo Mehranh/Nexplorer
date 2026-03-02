@@ -393,6 +393,32 @@
                         <CheckBox Content="Enable experimental features" IsChecked="{Binding EnableExperimentalFeatures}"
                                   Style="{StaticResource SettingCheck}"/>
                     </StackPanel>
+
+                    <!-- ─── About ─── -->
+                    <StackPanel Visibility="{Binding SelectedCategory.Key, Converter={StaticResource CategoryVisibilityConverter}, ConverterParameter=about}">
+                        <TextBlock Text="About" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="N" FontSize="28" FontWeight="Bold" Foreground="#1E88E5"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"
+                                       Background="Transparent"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Nexplorer" FontSize="18" FontWeight="SemiBold"/>
+                                <TextBlock FontSize="13" Foreground="{DynamicResource SubTextFg}">
+                                    <Run Text="Version"/>
+                                    <Run Text="{Binding AppVersion, Mode=OneWay}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Background="{DynamicResource InputBg}" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                            <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource SubTextFg}" FontSize="12" LineHeight="20">
+                                Nexplorer is a free, open-source dual-pane file explorer for Windows — 100% developed by AI (GitHub Copilot).
+                            </TextBlock>
+                        </Border>
+
+                        <TextBlock Text="© 2026 Nexplorer" Foreground="{DynamicResource SubTextFg}" FontSize="11" Margin="0,4,0,0"/>
+                    </StackPanel>
                 </Grid>
             </ScrollViewer>
         </DockPanel>
