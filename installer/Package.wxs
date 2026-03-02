@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="Nexplorer"
+           Manufacturer="Nexplorer"
+           Version="1.0.0.0"
+           UpgradeCode="7E159D46-37EA-4119-B514-3455A7AB6DFC"
+           Compressed="yes"
+           InstallerVersion="500">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Nexplorer is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- UI -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <!-- License (skip by overriding the dialog) -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <!-- Icon for Add/Remove Programs -->
+    <Icon Id="NexplorerIcon" SourceFile="..\src\FileExplorer.App\nexplorer.ico" />
+    <Property Id="ARPPRODUCTICON" Value="NexplorerIcon" />
+
+    <!-- Directory structure -->
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Nexplorer">
+        <Component Id="MainExe" Guid="2DC207EE-8B8C-4860-BEEF-34F39EDFE967">
+          <File Id="FileExplorerAppExe"
+                Source="..\publish\Nexplorer\FileExplorer.App.exe"
+                KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Desktop shortcut -->
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="951F3556-6CD4-4AD2-8DD1-02893701B3D6">
+        <Shortcut Id="DesktopShortcutLink"
+                  Name="Nexplorer"
+                  Description="Nexplorer File Explorer"
+                  Target="[INSTALLFOLDER]FileExplorer.App.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="NexplorerIcon" />
+        <RegistryValue Root="HKCU" Key="Software\Nexplorer"
+                       Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!-- Harvest all remaining files from publish folder -->
+    <ComponentGroup Id="PublishedFiles" Directory="INSTALLFOLDER">
+      <Files Include="..\publish\Nexplorer\**">
+        <Exclude Files="..\publish\Nexplorer\FileExplorer.App.exe" />
+      </Files>
+    </ComponentGroup>
+
+    <!-- Features -->
+    <Feature Id="Complete" Title="Nexplorer" Level="1">
+      <ComponentRef Id="MainExe" />
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentGroupRef Id="PublishedFiles" />
+    </Feature>
+
+  </Package>
+</Wix>

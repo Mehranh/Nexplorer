@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexplorer – Free AI-Powered File Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            width: 100%;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #21262d;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+        header .logo {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #1e88e5, #1976d2);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.2rem; color: #fff;
+        }
+        header h1 { font-size: 1.25rem; font-weight: 600; }
+        header .ver { color: #8b949e; font-size: .85rem; margin-left: .25rem; }
+        main {
+            max-width: 640px;
+            width: 100%;
+            padding: 3rem 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hero { text-align: center; margin-bottom: 2.5rem; }
+        .hero h2 { font-size: 2rem; font-weight: 700; margin-bottom: .75rem; }
+        .hero p { color: #8b949e; font-size: 1.05rem; line-height: 1.6; }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: #1e88e5;
+            color: #fff;
+            text-decoration: none;
+            padding: .85rem 2rem;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            transition: background .2s;
+            margin-bottom: .5rem;
+        }
+        .download-btn:hover { background: #1976d2; }
+        .download-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .meta { color: #8b949e; font-size: .85rem; margin-top: .5rem; }
+        .features {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+        .feature {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+        .feature h3 { font-size: .95rem; font-weight: 600; margin-bottom: .35rem; }
+        .feature p { color: #8b949e; font-size: .85rem; line-height: 1.5; }
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 1.5rem;
+            color: #484f58;
+            font-size: .8rem;
+            border-top: 1px solid #21262d;
+        }
+        footer a { color: #58a6ff; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        @media (max-width: 500px) {
+            .features { grid-template-columns: 1fr; }
+            .hero h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">N</div>
+        <h1>Nexplorer <span class="ver">v1.0.0</span></h1>
+    </header>
+    <main>
+        <div class="hero">
+            <h2>A Modern File Explorer,<br>Built with AI</h2>
+            <p>
+                Nexplorer is a free, open-source dual-pane file explorer for Windows
+                — designed and implemented with artificial intelligence.
+                Fast, lightweight, and packed with power-user features.
+            </p>
+        </div>
+
+        <a class="download-btn" href="https://github.com/Mehranh/Nexplorer-/releases/latest/download/Nexplorer-Setup.msi">
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Download Nexplorer v1.0.0
+        </a>
+        <p class="meta">Windows 10/11 &bull; 64-bit &bull; ~61 MB &bull; No runtime required</p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>Dual-Pane View</h3>
+                <p>Side-by-side file browsing with tabs for efficient file management.</p>
+            </div>
+            <div class="feature">
+                <h3>Integrated Terminal</h3>
+                <p>Built-in terminal with profiles, themes, and command history.</p>
+            </div>
+            <div class="feature">
+                <h3>Quick Edit</h3>
+                <p>Edit files directly with syntax highlighting powered by AvalonEdit.</p>
+            </div>
+            <div class="feature">
+                <h3>Batch Rename</h3>
+                <p>Rename multiple files at once with pattern matching and preview.</p>
+            </div>
+            <div class="feature">
+                <h3>Built-in Diff</h3>
+                <p>Compare files side by side with synchronized scrolling.</p>
+            </div>
+            <div class="feature">
+                <h3>Auto Updates</h3>
+                <p>Get notified of new versions automatically on startup.</p>
+            </div>
+        </div>
+    </main>
+    <footer>
+        &copy; 2026 Nexplorer &mdash;
+        <a href="https://github.com/Mehranh/Nexplorer-">GitHub</a>
+    </footer>
+</body>
+</html>

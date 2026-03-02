@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+using FileExplorer.App.Services;
 using FileExplorer.App.Services.Settings;
 
 namespace FileExplorer.App;
@@ -14,6 +16,28 @@ public partial class App : Application
         await SettingsService.LoadAsync();
         ApplyTheme(SettingsService.Current.Appearance.Theme);
         SettingsService.SettingsChanged += s => Dispatcher.Invoke(() => ApplyTheme(s.Appearance.Theme));
+
+        // Check for updates in background after the window is shown
+        _ = CheckForUpdateAsync();
+    }
+
+    private static async Task CheckForUpdateAsync()
+    {
+        var svc = new UpdateService();
+        var update = await svc.CheckForUpdateAsync();
+        if (update is null) return;
+
+        var result = MessageBox.Show(
+            $"Nexplorer v{update.Version} is available (you have v{UpdateService.CurrentVersion.ToString(3)}).\n\n" +
+            $"{update.ReleaseNotes}\n\nWould you like to download it now?",
+            "Update Available",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start(new ProcessStartInfo(update.DownloadUrl) { UseShellExecute = true });
+        }
     }
 
     internal static void ApplyTheme(AppTheme theme)
