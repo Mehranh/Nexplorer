@@ -19,7 +19,7 @@ Every line of code, UI layout, and architectural decision in this project was ge
 
 ## Download
 
-[**Download Nexplorer v1.0.10**](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi) (~61 MB, no runtime required)
+[**Download Nexplorer v1.0.11**](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi) (~61 MB, no runtime required)
 
 ## Build from Source
 
