@@ -148,13 +148,41 @@ public partial class MainWindow : Window
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    //  DOUBLE-CLICK
+    //  CLICK / DOUBLE-CLICK TO OPEN
     // ═══════════════════════════════════════════════════════════════════════
 
+    private bool IsSingleClickMode
+        => App.SettingsService.Current.General.ClickMode == Services.Settings.ClickMode.SingleClick;
+
     private void LeftList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        => Vm.LeftPane.OpenSelectedCommand.Execute(null);
+    {
+        if (!IsSingleClickMode) Vm.LeftPane.OpenSelectedCommand.Execute(null);
+    }
     private void RightList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        => Vm.RightPane.OpenSelectedCommand.Execute(null);
+    {
+        if (!IsSingleClickMode) Vm.RightPane.OpenSelectedCommand.Execute(null);
+    }
+
+    private void LeftList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (IsSingleClickMode && GetClickedItem<FileItemViewModel>(e) != null)
+            Dispatcher.InvokeAsync(() => Vm.LeftPane.OpenSelectedCommand.Execute(null),
+                System.Windows.Threading.DispatcherPriority.Background);
+    }
+    private void RightList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (IsSingleClickMode && GetClickedItem<FileItemViewModel>(e) != null)
+            Dispatcher.InvokeAsync(() => Vm.RightPane.OpenSelectedCommand.Execute(null),
+                System.Windows.Threading.DispatcherPriority.Background);
+    }
+
+    private static T? GetClickedItem<T>(MouseButtonEventArgs e) where T : class
+    {
+        if (e.OriginalSource is not DependencyObject dep) return null;
+        while (dep != null && dep is not ListViewItem && dep is not ListBoxItem)
+            dep = VisualTreeHelper.GetParent(dep);
+        return (dep as FrameworkElement)?.DataContext as T;
+    }
     private void HistoryList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (HistoryList.SelectedItem is CommandHistoryEntry entry)
