@@ -1,5 +1,5 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "downloadUrl": "https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi",
-  "releaseNotes": "About page, single-click hover styling, version updates."
+  "releaseNotes": "Update check improvements, Check for Updates button in Settings."
 }
