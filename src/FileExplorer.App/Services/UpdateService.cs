@@ -20,7 +20,9 @@ public sealed class UpdateService
     {
         try
         {
-            var json = await Http.GetStringAsync(VersionUrl);
+            // Cache-busting query param to avoid stale CDN responses
+            var url = $"{VersionUrl}?t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            var json = await Http.GetStringAsync(url).ConfigureAwait(false);
             var info = JsonSerializer.Deserialize<UpdateInfo>(json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 

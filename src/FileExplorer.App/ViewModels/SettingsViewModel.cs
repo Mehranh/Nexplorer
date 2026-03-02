@@ -154,7 +154,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         // Skip non-setting properties
         if (e.PropertyName is nameof(SelectedCategory) or nameof(SearchText)
-            or nameof(FilteredSettings))
+            or nameof(FilteredSettings) or nameof(UpdateStatus) or nameof(IsCheckingForUpdate))
             return;
 
         PushToService();
@@ -210,6 +210,51 @@ public sealed partial class SettingsViewModel : ObservableObject
             "Explorer", "logs");
         Directory.CreateDirectory(logDir);
         Process.Start(new ProcessStartInfo(logDir) { UseShellExecute = true });
+    }
+
+    [ObservableProperty] private string _updateStatus = string.Empty;
+    [ObservableProperty] private bool _isCheckingForUpdate;
+
+    [RelayCommand]
+    private async Task CheckForUpdateAsync()
+    {
+        IsCheckingForUpdate = true;
+        UpdateStatus = "Checking…";
+        try
+        {
+            var svc = new UpdateService();
+            var update = await svc.CheckForUpdateAsync().ConfigureAwait(false);
+            if (update is not null)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    UpdateStatus = $"v{update.Version} available!";
+                    var result = System.Windows.MessageBox.Show(
+                        $"Nexplorer v{update.Version} is available (you have v{UpdateService.CurrentVersion.ToString(3)}).\n\n" +
+                        $"{update.ReleaseNotes}\n\nWould you like to download it now?",
+                        "Update Available",
+                        System.Windows.MessageBoxButton.YesNo,
+                        System.Windows.MessageBoxImage.Information);
+                    if (result == System.Windows.MessageBoxResult.Yes)
+                        Process.Start(new ProcessStartInfo(update.DownloadUrl) { UseShellExecute = true });
+                });
+            }
+            else
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    UpdateStatus = "You're up to date!");
+            }
+        }
+        catch
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                UpdateStatus = "Check failed — try again later.");
+        }
+        finally
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                IsCheckingForUpdate = false);
+        }
     }
 
     // ── Snapshot ↔ ViewModel mapping ───────────────────────────────────────

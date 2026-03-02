@@ -23,21 +23,28 @@ public partial class App : Application
 
     private static async Task CheckForUpdateAsync()
     {
+        // Small delay so the main window is fully loaded before showing a dialog
+        await Task.Delay(3000).ConfigureAwait(false);
+
         var svc = new UpdateService();
-        var update = await svc.CheckForUpdateAsync();
+        var update = await svc.CheckForUpdateAsync().ConfigureAwait(false);
         if (update is null) return;
 
-        var result = MessageBox.Show(
-            $"Nexplorer v{update.Version} is available (you have v{UpdateService.CurrentVersion.ToString(3)}).\n\n" +
-            $"{update.ReleaseNotes}\n\nWould you like to download it now?",
-            "Update Available",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Information);
-
-        if (result == MessageBoxResult.Yes)
+        // Must show MessageBox on the UI thread
+        Current.Dispatcher.Invoke(() =>
         {
-            Process.Start(new ProcessStartInfo(update.DownloadUrl) { UseShellExecute = true });
-        }
+            var result = MessageBox.Show(
+                $"Nexplorer v{update.Version} is available (you have v{UpdateService.CurrentVersion.ToString(3)}).\n\n" +
+                $"{update.ReleaseNotes}\n\nWould you like to download it now?",
+                "Update Available",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Process.Start(new ProcessStartInfo(update.DownloadUrl) { UseShellExecute = true });
+            }
+        });
     }
 
     internal static void ApplyTheme(AppTheme theme)

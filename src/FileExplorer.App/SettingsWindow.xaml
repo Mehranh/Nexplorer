@@ -411,6 +411,15 @@
                             </StackPanel>
                         </StackPanel>
 
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Button Content="Check for Updates"
+                                    Command="{Binding CheckForUpdateCommand}"
+                                    Style="{StaticResource SettingsButton}"
+                                    Margin="0,0,12,0"/>
+                            <TextBlock Text="{Binding UpdateStatus}" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SubTextFg}" FontSize="12"/>
+                        </StackPanel>
+
                         <Border Background="{DynamicResource InputBg}" CornerRadius="4" Padding="12" Margin="0,0,0,12">
                             <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource SubTextFg}" FontSize="12" LineHeight="20">
                                 Nexplorer is a free, open-source dual-pane file explorer for Windows — 100% developed by AI (GitHub Copilot).
