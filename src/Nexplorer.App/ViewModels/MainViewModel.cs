@@ -192,6 +192,15 @@ public sealed partial class MainViewModel : ObservableObject
         await Task.CompletedTask;
     }
 
+    /// <summary>Navigate active pane to the other pane's current folder.</summary>
+    [RelayCommand]
+    private async Task GoToOtherPaneFolderAsync()
+    {
+        var dest = OtherPane.CurrentPath;
+        if (!string.IsNullOrWhiteSpace(dest))
+            await ActivePane.GoToAsync(dest, pushHistory: true);
+    }
+
     // ─── Copy queue ───────────────────────────────────────────────────────────
 
     public CopyQueueService CopyQueue => CopyQueueService.Instance;

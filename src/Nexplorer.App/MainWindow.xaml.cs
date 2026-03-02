@@ -226,6 +226,8 @@ public partial class MainWindow : Window
         => _ = Vm.CopyToOtherPaneCommand.ExecuteAsync(null);
     private void MoveToOtherPane_Click(object sender, RoutedEventArgs e)
         => _ = Vm.MoveToOtherPaneCommand.ExecuteAsync(null);
+    private void GoToOtherPaneFolder_Click(object sender, RoutedEventArgs e)
+        => _ = Vm.GoToOtherPaneFolderCommand.ExecuteAsync(null);
 
     // ═══════════════════════════════════════════════════════════════════════
     //  VIEW MODE

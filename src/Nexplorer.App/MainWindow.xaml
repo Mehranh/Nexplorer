@@ -70,6 +70,9 @@
                      IsEnabled="{Binding HasSelection}"/>
             <MenuItem Header="Move to Other Pane"  Click="MoveToOtherPane_Click"  InputGestureText="F6"
                      IsEnabled="{Binding HasSelection}"/>
+            <MenuItem Header="Go to Other Pane's Folder"  Click="GoToOtherPaneFolder_Click">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FolderSwap" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+            </MenuItem>
             <Separator/>
             <MenuItem Header="Batch Rename…"  Click="BatchRename_Click"           InputGestureText="Ctrl+M"
                      IsEnabled="{Binding HasSelection}">
