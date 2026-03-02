@@ -9,7 +9,7 @@ public sealed record UpdateInfo(string Version, string DownloadUrl, string Relea
 public sealed class UpdateService
 {
     private const string VersionUrl =
-        "https://mehranh.github.io/Nexplorer-/version.json";
+        "https://mehranh.github.io/Nexplorer/version.json";
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
 
