@@ -223,9 +223,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         try
         {
             var svc = new UpdateService();
-            var update = await svc.CheckForUpdateAsync().ConfigureAwait(false);
-            if (update is not null)
+            var result = await svc.CheckForUpdateAsync().ConfigureAwait(false);
+            if (result.Status is UpdateCheckStatus.UpdateAvailable && result.Update is not null)
             {
+                var update = result.Update;
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     UpdateStatus = $"v{update.Version} available!";
@@ -239,10 +240,15 @@ public sealed partial class SettingsViewModel : ObservableObject
                         Process.Start(new ProcessStartInfo(update.DownloadUrl) { UseShellExecute = true });
                 });
             }
-            else
+            else if (result.Status is UpdateCheckStatus.UpToDate)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     UpdateStatus = "You're up to date!");
+            }
+            else
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    UpdateStatus = "Check failed — try again later.");
             }
         }
         catch

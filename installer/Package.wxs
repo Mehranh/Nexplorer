@@ -4,7 +4,7 @@
 
   <Package Name="Nexplorer"
            Manufacturer="Nexplorer"
-           Version="1.0.10.0"
+           Version="1.0.8.0"
            UpgradeCode="7E159D46-37EA-4119-B514-3455A7AB6DFC"
            Compressed="yes"
            InstallerVersion="500">

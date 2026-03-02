@@ -27,8 +27,9 @@ public partial class App : Application
         await Task.Delay(3000).ConfigureAwait(false);
 
         var svc = new UpdateService();
-        var update = await svc.CheckForUpdateAsync().ConfigureAwait(false);
-        if (update is null) return;
+        var result = await svc.CheckForUpdateAsync().ConfigureAwait(false);
+        if (result.Status is not UpdateCheckStatus.UpdateAvailable || result.Update is null) return;
+        var update = result.Update;
 
         // Must show MessageBox on the UI thread
         Current.Dispatcher.Invoke(() =>
