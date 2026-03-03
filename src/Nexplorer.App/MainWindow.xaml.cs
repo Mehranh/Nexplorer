@@ -47,6 +47,27 @@ public partial class MainWindow : Window
         // Apply title bar theme once the window handle is available
         SourceInitialized += (_, _) => ApplyTitleBarTheme();
 
+        // Dismiss suggestion popup on minimize; reposition on resize
+        StateChanged += (_, _) =>
+        {
+            if (WindowState == WindowState.Minimized && Vm.ShowSuggestions)
+                Vm.DismissSuggestions();
+        };
+        SizeChanged += (_, _) =>
+        {
+            if (SuggestionPopup.IsOpen)
+                UpdateSuggestionPopupPosition();
+        };
+        LocationChanged += (_, _) =>
+        {
+            if (SuggestionPopup.IsOpen)
+            {
+                // Force WPF to recalculate popup screen position
+                SuggestionPopup.HorizontalOffset += 0.1;
+                SuggestionPopup.HorizontalOffset -= 0.1;
+            }
+        };
+
         // Re-apply title bar when theme changes
         App.SettingsService.SettingsChanged += _ => Dispatcher.Invoke(ApplyTitleBarTheme);
 
@@ -820,13 +841,19 @@ public partial class MainWindow : Window
                 e.Handled = true; break;
 
             case Key.Tab:
-                vm.HandleTabCompletion(); CommandInput.CaretIndex = CommandInput.Text.Length;
+                // Accept inline ghost suggestion first (like PowerShell), otherwise cycle tab completions
+                if (!string.IsNullOrWhiteSpace(vm.InlineSuggestion) && vm.InlineSuggestion.TrimStart() != vm.CommandText)
+                    vm.AcceptSuggestion();
+                else if (vm.ShowSuggestions && vm.SelectedSuggestionIndex >= 0)
+                    vm.AcceptSuggestion();
+                else
+                    vm.HandleTabCompletion();
+                CommandInput.CaretIndex = CommandInput.Text.Length;
                 e.Handled = true; break;
 
             case Key.Right when CommandInput.CaretIndex == CommandInput.Text.Length:
             case Key.End   when CommandInput.CaretIndex == CommandInput.Text.Length:
-                if (!string.IsNullOrEmpty(vm.InlineSuggestion) && vm.InlineSuggestion != vm.CommandText
-                    && vm.InlineSuggestion.StartsWith(vm.CommandText, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrWhiteSpace(vm.InlineSuggestion) && vm.InlineSuggestion.TrimStart() != vm.CommandText)
                 { vm.AcceptSuggestion(); CommandInput.CaretIndex = CommandInput.Text.Length; e.Handled = true; }
                 break;
 
@@ -856,6 +883,42 @@ public partial class MainWindow : Window
             CommandInput.Focus();
             CommandInput.CaretIndex = CommandInput.Text.Length;
         }
+    }
+
+    private void SuggestionPopup_Opened(object? sender, EventArgs e)
+    {
+        UpdateSuggestionPopupPosition();
+    }
+
+    private void CommandInput_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (SuggestionPopup.IsOpen)
+            UpdateSuggestionPopupPosition();
+    }
+
+    private void UpdateSuggestionPopupPosition()
+    {
+        var caretIndex = CommandInput.CaretIndex;
+        if (caretIndex < 0) caretIndex = 0;
+        var textLength = CommandInput.Text?.Length ?? 0;
+        if (caretIndex > textLength) caretIndex = textLength;
+
+        var caretRect = CommandInput.GetRectFromCharacterIndex(caretIndex);
+        var x = caretRect.X;
+
+        // Measure popup width; if not yet rendered, use MinWidth
+        var popupWidth = SuggestionPopup.Child is FrameworkElement child && child.ActualWidth > 0
+            ? child.ActualWidth : 320;
+        var inputWidth = CommandInput.ActualWidth;
+
+        // Keep popup within the TextBox bounds
+        if (x + popupWidth > inputWidth)
+            x = Math.Max(0, inputWidth - popupWidth);
+
+        // Position the popup so its bottom-left corner sits at the caret
+        var popupHeight = (SuggestionPopup.Child as FrameworkElement)?.ActualHeight ?? 220;
+        SuggestionPopup.HorizontalOffset = x;
+        SuggestionPopup.VerticalOffset = -popupHeight;
     }
 
     // ═══════════════════════════════════════════════════════════════════════

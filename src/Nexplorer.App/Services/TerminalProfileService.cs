@@ -9,6 +9,9 @@ namespace Nexplorer.App.Services;
 /// </summary>
 public sealed class TerminalProfileService
 {
+    private const string PowerShellDefaultArguments = "-NoLogo -Command";
+    private const string PowerShellLegacyArguments = "-NoLogo -NoProfile -NonInteractive -Command";
+
     private static readonly string BasePath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Nexplorer");
 
@@ -83,6 +86,8 @@ public sealed class TerminalProfileService
 
     private void EnsureDefaults()
     {
+        var profilesChanged = false;
+
         // ── Default profiles ──
         if (_profiles.Count == 0)
         {
@@ -90,7 +95,7 @@ public sealed class TerminalProfileService
                 Name: "PowerShell",
                 Shell: ShellKind.PowerShell,
                 ExecutablePath: "powershell.exe",
-                Arguments: "-NoLogo -NoProfile -NonInteractive -Command",
+                Arguments: PowerShellDefaultArguments,
                 IconGlyph: "\uE756"));
 
             _profiles.Add(new TerminalProfile(
@@ -108,11 +113,31 @@ public sealed class TerminalProfileService
                     Name: "PowerShell 7",
                     Shell: ShellKind.PowerShell,
                     ExecutablePath: pwshPath,
-                    Arguments: "-NoLogo -NoProfile -NonInteractive -Command",
+                    Arguments: PowerShellDefaultArguments,
                     IconGlyph: "\uE756"));
             }
 
             SaveProfiles();
+        }
+        else
+        {
+            for (var i = 0; i < _profiles.Count; i++)
+            {
+                var profile = _profiles[i];
+                if (profile.Shell != ShellKind.PowerShell) continue;
+
+                if (string.Equals(
+                    profile.Arguments.Trim(),
+                    PowerShellLegacyArguments,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    _profiles[i] = profile with { Arguments = PowerShellDefaultArguments };
+                    profilesChanged = true;
+                }
+            }
+
+            if (profilesChanged)
+                SaveProfiles();
         }
 
         // ── Default themes ──

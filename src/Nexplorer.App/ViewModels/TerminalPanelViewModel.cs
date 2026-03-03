@@ -6,7 +6,7 @@ using Nexplorer.App.Services;
 namespace Nexplorer.App.ViewModels;
 
 /// <summary>
-/// Manages the terminal panel: multiple tabs, split panes, profiles, and themes.
+/// Manages the terminal panel: multiple tabs, split panes, and profiles.
 /// </summary>
 public sealed partial class TerminalPanelViewModel : ObservableObject
 {
@@ -27,12 +27,16 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
                 SharedHistory.Add(entry);
         }
 
-        // Create the first terminal tab
-        var firstTab = CreateTab(ShellKind.PowerShell, initialDirectory);
+        // Create the first terminal tab from default profile
+        var defaultProfile = _profileService.GetDefault();
+        var firstTab = CreateTab(
+            defaultProfile.Shell,
+            initialDirectory,
+            defaultProfile.ExecutablePath,
+            defaultProfile.Arguments);
+        firstTab.Header = defaultProfile.Name;
         Tabs.Add(firstTab);
         ActiveTab = firstTab;
-
-        SelectedTheme = _profileService.GetDefaultTheme();
     }
 
     // ─── Tabs ─────────────────────────────────────────────────────────────────
@@ -51,23 +55,29 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
     public ObservableCollection<CommandHistoryEntry> SharedHistory { get; }
     public AliasService AliasService => _aliasService;
 
-    // ─── Profiles & themes ────────────────────────────────────────────────────
+    // ─── Profiles ─────────────────────────────────────────────────────────────
 
     public IReadOnlyList<TerminalProfile> Profiles => _profileService.Profiles;
-    public IReadOnlyList<TerminalTheme> Themes => _profileService.Themes;
-
-    [ObservableProperty] private TerminalTheme? _selectedTheme;
 
     public IReadOnlyList<ShellKind> ShellKinds { get; } =
         (ShellKind[])Enum.GetValues(typeof(ShellKind));
 
     // ─── Tab management ───────────────────────────────────────────────────────
 
-    private TerminalTabViewModel CreateTab(ShellKind shell, string workingDirectory)
+    private TerminalTabViewModel CreateTab(
+        ShellKind shell,
+        string workingDirectory,
+        string? shellExecutablePath = null,
+        string? shellArguments = null)
     {
         var tab = new TerminalTabViewModel(
-            shell, workingDirectory, _aliasService, _historyStore, SharedHistory, SelectedTheme);
-        tab.ThemeChangeRequested += OnTabThemeChangeRequested;
+            shell,
+            workingDirectory,
+            _aliasService,
+            _historyStore,
+            SharedHistory,
+            shellExecutablePath: shellExecutablePath,
+            shellArguments: shellArguments);
         return tab;
     }
 
@@ -83,7 +93,7 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
         var wd = ActiveTab?.WorkingDirectory
                  ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var shell = ActiveTab?.Shell ?? ShellKind.PowerShell;
-        var tab = CreateTab(shell, wd);
+        var tab = CreateTab(shell, wd, ActiveTab?.ShellExecutablePath, ActiveTab?.ShellArguments);
         Tabs.Add(tab);
         ActiveTab = tab;
     }
@@ -96,7 +106,7 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
         var wd = profile.StartupDirectory
                  ?? ActiveTab?.WorkingDirectory
                  ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var tab = CreateTab(profile.Shell, wd);
+        var tab = CreateTab(profile.Shell, wd, profile.ExecutablePath, profile.Arguments);
         tab.Header = profile.Name;
         Tabs.Add(tab);
         ActiveTab = tab;
@@ -107,7 +117,6 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
     {
         if (tab is null || Tabs.Count <= 1) return;
 
-        tab.ThemeChangeRequested -= OnTabThemeChangeRequested;
         var idx = Tabs.IndexOf(tab);
         Tabs.Remove(tab);
 
@@ -120,7 +129,11 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
     private void DuplicateTab()
     {
         if (ActiveTab is null) return;
-        var tab = CreateTab(ActiveTab.Shell, ActiveTab.WorkingDirectory);
+        var tab = CreateTab(
+            ActiveTab.Shell,
+            ActiveTab.WorkingDirectory,
+            ActiveTab.ShellExecutablePath,
+            ActiveTab.ShellArguments);
         Tabs.Add(tab);
         ActiveTab = tab;
     }
@@ -176,37 +189,10 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
     {
         if (SplitTab is not null)
         {
-            SplitTab.ThemeChangeRequested -= OnTabThemeChangeRequested;
             Tabs.Remove(SplitTab);
             SplitTab = null;
         }
         SplitOrientation = TerminalSplitOrientation.None;
-    }
-
-    // ─── Theme ────────────────────────────────────────────────────────────────
-
-    [RelayCommand]
-    private void SelectTheme(TerminalTheme? theme)
-    {
-        if (theme is null) return;
-        SelectedTheme = theme;
-        // Apply to all tabs
-        foreach (var tab in Tabs)
-            tab.Theme = theme;
-    }
-
-    private void OnTabThemeChangeRequested(object? sender, string themeId)
-    {
-        var theme = _profileService.GetThemeById(themeId);
-        if (theme is not null)
-            SelectTheme(theme);
-        else if (sender is TerminalTabViewModel tab)
-        {
-            tab.OutputSegments.Clear();
-            tab.OutputSegments.Add(new AnsiSegment(
-                $"Unknown theme: {themeId}. Available: {string.Join(", ", Themes.Select(t => t.Id))}\n",
-                "#E74856"));
-        }
     }
 
     // ─── Navigate tab working directory (called from pane) ────────────────────
