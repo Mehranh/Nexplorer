@@ -2,10 +2,13 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Nexplorer.App.Controls;
+using Nexplorer.App.Services;
 using Nexplorer.App.Services.Settings;
 using Nexplorer.App.ViewModels;
 
@@ -194,12 +197,14 @@ public partial class MainWindow : Window
 
     private void LeftList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        PaneList_PreviewMouseLeftButtonUp(sender, e);
         if (IsSingleClickMode && GetClickedItem<FileItemViewModel>(e) != null)
             Dispatcher.InvokeAsync(() => Vm.LeftPane.OpenSelectedCommand.Execute(null),
                 System.Windows.Threading.DispatcherPriority.Background);
     }
     private void RightList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        PaneList_PreviewMouseLeftButtonUp(sender, e);
         if (IsSingleClickMode && GetClickedItem<FileItemViewModel>(e) != null)
             Dispatcher.InvokeAsync(() => Vm.RightPane.OpenSelectedCommand.Execute(null),
                 System.Windows.Threading.DispatcherPriority.Background);
@@ -295,6 +300,215 @@ public partial class MainWindow : Window
         Vm.RightPane.SelectedItems = RightIconList.SelectedItems.Cast<FileItemViewModel>().ToList();
         if (Vm.RightPane.IsPreviewVisible)
             UpdatePreview(Vm.RightPane.SelectedItem, RightPreviewPanel);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  DRAG & DROP + RUBBER-BAND SELECTION
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private Point _dragStartPoint;
+    private bool _isDragInProgress;
+    private bool _dragStartedOnItem;
+
+    // Rubber-band state
+    private RubberBandAdorner? _rubberBand;
+    private ItemsControl? _rubberBandOwner;
+    private Point _rubberBandStart;
+
+    private void PaneList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStartPoint = e.GetPosition(null);
+        _dragStartedOnItem = GetClickedItem<FileItemViewModel>(e) is not null;
+
+        // If clicked on empty space, prepare for rubber-band selection
+        if (!_dragStartedOnItem && sender is ItemsControl listControl)
+        {
+            _rubberBandStart = e.GetPosition(listControl);
+            // Clear current selection unless Ctrl is held
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+            {
+                if (listControl is ListBox lb) lb.SelectedItems.Clear();
+                else if (listControl is ListView lv) lv.SelectedItems.Clear();
+            }
+        }
+    }
+
+    private void PaneList_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || _isDragInProgress) return;
+
+        var pos = e.GetPosition(null);
+        var diff = _dragStartPoint - pos;
+
+        if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance &&
+            Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance)
+            return;
+
+        // ── File drag-and-drop (started on an item) ──
+        if (_dragStartedOnItem)
+        {
+            if (GetClickedItem<FileItemViewModel>(e) is null) return;
+
+            var listControl = (ItemsControl)sender;
+            var pane = listControl.Tag as PaneViewModel;
+            if (pane is null) return;
+
+            var paths = pane.SelectedItems.Select(i => i.FullPath).ToList();
+            if (paths.Count == 0 && pane.SelectedItem is not null)
+                paths.Add(pane.SelectedItem.FullPath);
+            if (paths.Count == 0) return;
+
+            var data = new DataObject();
+            data.SetData("NexplorerDragSource", pane);
+            data.SetData(DataFormats.FileDrop, paths.ToArray());
+
+            _isDragInProgress = true;
+            try
+            {
+                DragDrop.DoDragDrop(listControl, data, DragDropEffects.Copy | DragDropEffects.Move);
+            }
+            finally
+            {
+                _isDragInProgress = false;
+            }
+            return;
+        }
+
+        // ── Rubber-band selection (started on empty space) ──
+        if (sender is not ItemsControl owner) return;
+
+        var currentPos = e.GetPosition(owner);
+
+        if (_rubberBand is null)
+        {
+            var layer = AdornerLayer.GetAdornerLayer(owner);
+            if (layer is null) return;
+
+            _rubberBand = new RubberBandAdorner(owner, _rubberBandStart);
+            _rubberBandOwner = owner;
+            layer.Add(_rubberBand);
+            owner.CaptureMouse();
+        }
+
+        _rubberBand.UpdateEndPoint(currentPos);
+        UpdateRubberBandSelection(owner, _rubberBand.SelectionRect);
+    }
+
+    private void PaneList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_rubberBand is not null && _rubberBandOwner is not null)
+        {
+            _rubberBandOwner.ReleaseMouseCapture();
+            var layer = AdornerLayer.GetAdornerLayer(_rubberBandOwner);
+            layer?.Remove(_rubberBand);
+            _rubberBand = null;
+            _rubberBandOwner = null;
+        }
+    }
+
+    private void UpdateRubberBandSelection(ItemsControl owner, Rect selectionRect)
+    {
+        bool ctrlHeld = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+
+        for (int i = 0; i < owner.Items.Count; i++)
+        {
+            if (owner.ItemContainerGenerator.ContainerFromIndex(i) is not FrameworkElement container)
+                continue;
+
+            var itemBounds = VisualTreeHelper.GetDescendantBounds(container);
+            var itemRect = container.TransformToAncestor(owner)
+                .TransformBounds(itemBounds);
+
+            bool intersects = selectionRect.IntersectsWith(itemRect);
+
+            if (owner is ListBox lb)
+            {
+                if (intersects && !lb.SelectedItems.Contains(owner.Items[i]))
+                    lb.SelectedItems.Add(owner.Items[i]);
+                else if (!intersects && !ctrlHeld && lb.SelectedItems.Contains(owner.Items[i]))
+                    lb.SelectedItems.Remove(owner.Items[i]);
+            }
+            else if (owner is ListView lv)
+            {
+                if (intersects && !lv.SelectedItems.Contains(owner.Items[i]))
+                    lv.SelectedItems.Add(owner.Items[i]);
+                else if (!intersects && !ctrlHeld && lv.SelectedItems.Contains(owner.Items[i]))
+                    lv.SelectedItems.Remove(owner.Items[i]);
+            }
+        }
+    }
+
+    private static T? GetClickedItem<T>(MouseEventArgs e) where T : class
+    {
+        if (e.OriginalSource is not DependencyObject dep) return null;
+        while (dep != null && dep is not ListViewItem && dep is not ListBoxItem)
+            dep = VisualTreeHelper.GetParent(dep);
+        return (dep as FrameworkElement)?.DataContext as T;
+    }
+
+    private void PaneList_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = DragDropEffects.None;
+
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+
+        // Don't allow drop on the same pane that started the drag
+        var listControl = (ItemsControl)sender;
+        var targetPane = listControl.Tag as PaneViewModel;
+        if (targetPane is null) return;
+
+        if (e.Data.GetDataPresent("NexplorerDragSource"))
+        {
+            var sourcePane = e.Data.GetData("NexplorerDragSource") as PaneViewModel;
+            if (sourcePane == targetPane) return;
+        }
+
+        e.Effects = (e.KeyStates & DragDropKeyStates.ShiftKey) != 0
+            ? DragDropEffects.Move
+            : DragDropEffects.Copy;
+        e.Handled = true;
+    }
+
+    private void PaneList_Drop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+
+        var listControl = (ItemsControl)sender;
+        var targetPane = listControl.Tag as PaneViewModel;
+        if (targetPane is null) return;
+
+        // Determine the source pane to prevent drop on itself
+        PaneViewModel? sourcePane = null;
+        if (e.Data.GetDataPresent("NexplorerDragSource"))
+            sourcePane = e.Data.GetData("NexplorerDragSource") as PaneViewModel;
+
+        if (sourcePane == targetPane) return;
+
+        var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+        if (files is null || files.Length == 0) return;
+
+        var sources = files.Where(s => !string.IsNullOrEmpty(s)).ToList();
+        if (sources.Count == 0) return;
+
+        var dest = targetPane.CurrentPath;
+        if (string.IsNullOrWhiteSpace(dest)) return;
+
+        var isMove = (e.KeyStates & DragDropKeyStates.ShiftKey) != 0;
+        var job = CopyQueueService.Instance.Enqueue(sources, dest, isMove);
+        job.PropertyChanged += (_, ev) =>
+        {
+            if (ev.PropertyName == nameof(CopyJob.Status) && job.Status == CopyJobStatus.Completed)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _ = targetPane.GoToAsync(dest, pushHistory: false);
+                    if (isMove && sourcePane is not null)
+                        _ = sourcePane.GoToAsync(sourcePane.CurrentPath, pushHistory: false);
+                });
+            }
+        };
+
+        e.Handled = true;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
