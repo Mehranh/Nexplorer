@@ -326,10 +326,10 @@
 
         <!-- F-key toolbar button -->
         <Style x:Key="FKeyButton" TargetType="Button">
-            <Setter Property="Background"     Value="{DynamicResource HeaderBg}"/>
+            <Setter Property="Background"     Value="{DynamicResource FKeyBg}"/>
             <Setter Property="Foreground"     Value="{DynamicResource TextFg}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush"    Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderBrush"    Value="{DynamicResource FKeyBorder}"/>
             <Setter Property="Padding"        Value="8,3"/>
             <Setter Property="Cursor"         Value="Hand"/>
             <Setter Property="FontSize"       Value="11"/>

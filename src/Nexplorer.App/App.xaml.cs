@@ -68,7 +68,63 @@ public partial class App : Application
         }
 
         var res = Current.Resources;
-        if (effective == AppTheme.Light)
+        if (effective == AppTheme.Modern)
+        {
+            // iOS Files-inspired modern theme — clean, airy, soft depth
+            SetBrush(res, "AppBg",           "#F2F2F7");  // iOS grouped background
+            SetBrush(res, "PaneBg",          "#FFFFFF");  // card/surface white
+            SetBrush(res, "TreeBg",          "#F2F2F7");  // sidebar matches bg
+            SetBrush(res, "HeaderBg",        "#FBFBFD");  // translucent-feel nav bar
+            SetBrush(res, "StatusBg",        "#F2F2F7");
+            SetBrush(res, "TerminalBg",      "#FFFFFF");
+            SetBrush(res, "InputBg",         "#E5E5EA");  // iOS search-bar gray
+            SetBrush(res, "BorderBrush",     "#D1D1D6");  // iOS separator
+            SetBrush(res, "TextFg",          "#000000");  // primary label
+            SetBrush(res, "SubTextFg",       "#8E8E93");  // secondary label
+            SetBrush(res, "AccentBrush",     "#007AFF");  // iOS system blue
+            SetBrush(res, "HoverBg",         "#E5E5EA");
+            SetBrush(res, "SelBg",           "#D1E8FF");  // light blue selection
+            SetBrush(res, "SelBgInactive",   "#E5E5EA");
+            SetBrush(res, "ActivePaneBorder","#007AFF");
+            SetBrush(res, "ButtonBg",        "#E5E5EA");
+            SetBrush(res, "ButtonHoverBg",   "#D1D1D6");
+            SetBrush(res, "ButtonPressedBg", "#C7C7CC");
+            SetBrush(res, "InactiveTextFg",  "#AEAEB2");  // tertiary label
+            SetBrush(res, "DangerBorder",    "#FF3B30");  // iOS system red
+            SetBrush(res, "DangerHoverBg",   "#FFE5E3");
+
+            SetBrush(res, "DiffBg",              "#FFFFFF");
+            SetBrush(res, "DiffAddedHeaderBg",   "#DFF5E3");
+            SetBrush(res, "DiffRemovedHeaderBg", "#FFE5E3");
+            SetBrush(res, "DiffAddedFg",         "#34C759"); // iOS system green
+            SetBrush(res, "DiffRemovedFg",       "#FF3B30"); // iOS system red
+            SetBrush(res, "DiffAddedSubFg",      "#6BD983");
+            SetBrush(res, "DiffRemovedSubFg",    "#FF6961");
+            SetBrush(res, "DiffUnchangedFg",     "#3C3C43");
+            SetBrush(res, "DiffLineNumFg",       "#AEAEB2");
+            SetBrush(res, "GitStatusBg",         "#E3F9E5");
+            SetBrush(res, "GitStatusFg",         "#34C759");
+            SetBrush(res, "GitAvatarBg",         "#D1F0D8");
+            SetBrush(res, "GitAvatarFg",         "#30B050");
+            SetBrush(res, "FolderNameFg",        "#007AFF"); // blue folder tint
+            SetBrush(res, "HashFg",              "#5856D6"); // iOS system purple
+            SetBrush(res, "HistorySearchLabelFg", "#5AC8FA"); // iOS system teal
+            SetBrush(res, "HistorySearchResultFg", "#FF9500"); // iOS system orange
+
+            // iOS scrollbar: thin overlay style, translucent rounded thumb
+            SetBrush(res, "ScrollThumbBg",      "#C7C7CC");  // iOS scrollbar indicator
+            SetBrush(res, "ScrollThumbHoverBg", "#AEAEB2");
+            SetBrush(res, "ScrollThumbDragBg",  "#8E8E93");
+            SetBrush(res, "ScrollTrackBg",      "Transparent"); // transparent track (overlay)
+
+            // iOS nav icons: SF Symbols feel — blue tinted action icons
+            SetBrush(res, "NavIconFg",          "#007AFF");  // iOS system blue
+            SetBrush(res, "NavIconHoverFg",     "#0056B3");  // darker blue on hover
+            SetBrush(res, "HeaderSeparator",    "#E5E5EA");  // hairline iOS separator
+            SetBrush(res, "FKeyBg",            "#FFFFFF");   // card-white F-key buttons
+            SetBrush(res, "FKeyBorder",        "#D1D1D6");   // subtle border
+        }
+        else if (effective == AppTheme.Light)
         {
             SetBrush(res, "AppBg",           "#F5F5F5");
             SetBrush(res, "PaneBg",          "#FFFFFF");
@@ -109,6 +165,16 @@ public partial class App : Application
             SetBrush(res, "HashFg",              "#1565C0");
             SetBrush(res, "HistorySearchLabelFg", "#00838F");
             SetBrush(res, "HistorySearchResultFg", "#F57F17");
+
+            SetBrush(res, "ScrollThumbBg",      "#C0C0C0");
+            SetBrush(res, "ScrollThumbHoverBg", "#A0A0A0");
+            SetBrush(res, "ScrollThumbDragBg",  "#888888");
+            SetBrush(res, "ScrollTrackBg",      "#F3F3F3");
+            SetBrush(res, "NavIconFg",          "#6E6E6E");
+            SetBrush(res, "NavIconHoverFg",     "#1E1E1E");
+            SetBrush(res, "HeaderSeparator",    "#D4D4D4");
+            SetBrush(res, "FKeyBg",            "#E8E8E8");
+            SetBrush(res, "FKeyBorder",        "#D4D4D4");
         }
         else
         {
@@ -151,6 +217,16 @@ public partial class App : Application
             SetBrush(res, "HashFg",              "#569CD6");
             SetBrush(res, "HistorySearchLabelFg", "#61D6D6");
             SetBrush(res, "HistorySearchResultFg", "#F9F1A5");
+
+            SetBrush(res, "ScrollThumbBg",      "#3A3A3A");
+            SetBrush(res, "ScrollThumbHoverBg", "#4A4A4A");
+            SetBrush(res, "ScrollThumbDragBg",  "#666666");
+            SetBrush(res, "ScrollTrackBg",      "#1E1E1E");
+            SetBrush(res, "NavIconFg",          "#858585");
+            SetBrush(res, "NavIconHoverFg",     "#CCCCCC");
+            SetBrush(res, "HeaderSeparator",    "#3F3F46");
+            SetBrush(res, "FKeyBg",            "#2D2D30");
+            SetBrush(res, "FKeyBorder",        "#3F3F46");
         }
     }
 

@@ -11,7 +11,7 @@ public enum DefaultViewMode { Details, List, Compact }
 public enum ClickMode { SingleClick, DoubleClick }
 public enum DefaultSortMode { NaturalSort, FolderFirst }
 public enum DefaultShell { PowerShell, Cmd }
-public enum AppTheme { Light, Dark, System }
+public enum AppTheme { Light, Dark, System, Modern }
 public enum LogLevel { Error, Warning, Info, Debug }
 
 // ── Immutable persisted record ─────────────────────────────────────────────

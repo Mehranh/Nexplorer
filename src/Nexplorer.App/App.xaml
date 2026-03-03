@@ -66,6 +66,17 @@
             <SolidColorBrush x:Key="HistorySearchLabelFg" Color="#61D6D6"/>
             <SolidColorBrush x:Key="HistorySearchResultFg" Color="#F9F1A5"/>
 
+            <!-- ── iOS / extended theming keys ───────────────────────────── -->
+            <SolidColorBrush x:Key="ScrollThumbBg"      Color="#3A3A3A"/>
+            <SolidColorBrush x:Key="ScrollThumbHoverBg" Color="#3C3C3C"/>
+            <SolidColorBrush x:Key="ScrollThumbDragBg"  Color="#555555"/>
+            <SolidColorBrush x:Key="ScrollTrackBg"      Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="NavIconFg"          Color="#858585"/>
+            <SolidColorBrush x:Key="NavIconHoverFg"     Color="#CCCCCC"/>
+            <SolidColorBrush x:Key="HeaderSeparator"    Color="#3F3F46"/>
+            <SolidColorBrush x:Key="FKeyBg"            Color="#2D2D30"/>
+            <SolidColorBrush x:Key="FKeyBorder"        Color="#3F3F46"/>
+
             <!-- ── Base TextBox ───────────────────────────────────────────── -->
             <Style TargetType="TextBox">
                 <Setter Property="Background"            Value="{DynamicResource InputBg}"/>
@@ -224,7 +235,7 @@
             <!-- ── NavButton (toolbar icon buttons) ──────────────────────── -->
             <Style x:Key="NavButton" TargetType="Button">
                 <Setter Property="Background"      Value="Transparent"/>
-                <Setter Property="Foreground"      Value="{DynamicResource SubTextFg}"/>
+                <Setter Property="Foreground"      Value="{DynamicResource NavIconFg}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Width"           Value="28"/>
                 <Setter Property="Height"          Value="26"/>
@@ -240,7 +251,7 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonHoverBg}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource NavIconHoverFg}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
@@ -512,14 +523,14 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Thumb">
-                            <Border x:Name="ThumbBd" Background="{DynamicResource SelBgInactive}" CornerRadius="3"
+                            <Border x:Name="ThumbBd" Background="{DynamicResource ScrollThumbBg}" CornerRadius="3"
                                     SnapsToDevicePixels="True"/>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="ThumbBd" Property="Background" Value="{DynamicResource ButtonHoverBg}"/>
+                                    <Setter TargetName="ThumbBd" Property="Background" Value="{DynamicResource ScrollThumbHoverBg}"/>
                                 </Trigger>
                                 <Trigger Property="IsDragging" Value="True">
-                                    <Setter TargetName="ThumbBd" Property="Background" Value="{DynamicResource ButtonPressedBg}"/>
+                                    <Setter TargetName="ThumbBd" Property="Background" Value="{DynamicResource ScrollThumbDragBg}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -550,7 +561,7 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ScrollBar">
-                                    <Border Background="{DynamicResource StatusBg}" CornerRadius="4" Margin="0">
+                                    <Border Background="{DynamicResource ScrollTrackBg}" CornerRadius="4" Margin="0">
                                         <Track x:Name="PART_Track" IsDirectionReversed="True">
                                             <Track.DecreaseRepeatButton>
                                                 <RepeatButton Style="{StaticResource SlimScrollBarPageButton}" Command="ScrollBar.PageUpCommand"/>
@@ -572,7 +583,7 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ScrollBar">
-                                    <Border Background="{DynamicResource StatusBg}" CornerRadius="4" Margin="0">
+                                    <Border Background="{DynamicResource ScrollTrackBg}" CornerRadius="4" Margin="0">
                                         <Track x:Name="PART_Track" IsDirectionReversed="False">
                                             <Track.DecreaseRepeatButton>
                                                 <RepeatButton Style="{StaticResource SlimScrollBarPageButton}" Command="ScrollBar.PageLeftCommand"/>
