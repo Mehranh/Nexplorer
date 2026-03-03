@@ -200,10 +200,9 @@ public sealed partial class GitTabViewModel : ObservableObject
     private async Task DiscardFileAsync(GitStatusEntry? entry)
     {
         if (entry is null || CurrentDirectory is null) return;
-        var result = MessageBox.Show(
+        if (!NotificationService.Instance.Confirm(
             $"Discard changes to \"{entry.Path}\"?\nThis cannot be undone.",
-            "Discard Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes) return;
+            "Discard Changes")) return;
 
         if (entry.Status == GitChangeKind.Untracked)
             await GitService.CleanUntrackedFileAsync(CurrentDirectory, entry.Path);
@@ -229,10 +228,9 @@ public sealed partial class GitTabViewModel : ObservableObject
         if (CurrentDirectory is null || _selectedChangedFiles.Count == 0) return;
 
         var count = _selectedChangedFiles.Count;
-        var result = MessageBox.Show(
+        if (!NotificationService.Instance.Confirm(
             $"Discard changes to {count} file(s)?\nThis cannot be undone.",
-            "Discard Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes) return;
+            "Discard Changes")) return;
 
         foreach (var entry in _selectedChangedFiles.ToList())
         {
@@ -249,10 +247,9 @@ public sealed partial class GitTabViewModel : ObservableObject
     {
         if (CurrentDirectory is null || ChangedFiles.Count == 0) return;
 
-        var result = MessageBox.Show(
+        if (!NotificationService.Instance.Confirm(
             $"Discard ALL {ChangedFiles.Count} change(s)?\nThis cannot be undone.",
-            "Discard All Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes) return;
+            "Discard All Changes")) return;
 
         await GitService.DiscardAllAsync(CurrentDirectory);
         await RefreshAsync();

@@ -621,16 +621,14 @@ public partial class MainWindow : Window
 
         if (!isEditable)
         {
-            MessageBox.Show($"Quick Edit does not support '{ext}' files.",
-                "Quick Edit", MessageBoxButton.OK, MessageBoxImage.Information);
+            NotificationService.Instance.Warn($"Quick Edit does not support '{ext}' files.", "Quick Edit");
             return;
         }
 
         var info = new FileInfo(selected.FullPath);
         if (info.Length > 5 * 1024 * 1024) // 5 MB limit
         {
-            MessageBox.Show("File is too large for Quick Edit (max 5 MB).",
-                "Quick Edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Instance.Warn("File is too large for Quick Edit (max 5 MB).", "Quick Edit");
             return;
         }
 
@@ -643,7 +641,7 @@ public partial class MainWindow : Window
         {
             var logPath = Path.Combine(Path.GetTempPath(), "quickedit_error.log");
             File.WriteAllText(logPath, ex.ToString());
-            MessageBox.Show(ex.ToString(), "Quick Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            NotificationService.Instance.Error(ex.Message, "Quick Edit Error");
         }
     }
 
@@ -658,15 +656,13 @@ public partial class MainWindow : Window
 
         if (leftSelected is null || rightSelected is null)
         {
-            MessageBox.Show("Select one file in the left pane and one in the right pane to compare.",
-                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            NotificationService.Instance.Info("Select one file in the left pane and one in the right pane to compare.", "File Diff");
             return;
         }
 
         if (leftSelected.IsDirectory || rightSelected.IsDirectory)
         {
-            MessageBox.Show("File Diff only works with files, not directories.",
-                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            NotificationService.Instance.Info("File Diff only works with files, not directories.", "File Diff");
             return;
         }
 
@@ -674,22 +670,19 @@ public partial class MainWindow : Window
         var rightExt = Path.GetExtension(rightSelected.FullPath);
         if (!s_quickEditExts.Contains(leftExt) && !string.IsNullOrEmpty(leftExt))
         {
-            MessageBox.Show($"File Diff does not support '{leftExt}' files.",
-                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            NotificationService.Instance.Warn($"File Diff does not support '{leftExt}' files.", "File Diff");
             return;
         }
         if (!s_quickEditExts.Contains(rightExt) && !string.IsNullOrEmpty(rightExt))
         {
-            MessageBox.Show($"File Diff does not support '{rightExt}' files.",
-                "File Diff", MessageBoxButton.OK, MessageBoxImage.Information);
+            NotificationService.Instance.Warn($"File Diff does not support '{rightExt}' files.", "File Diff");
             return;
         }
 
         const long maxSize = 5 * 1024 * 1024;
         if (new FileInfo(leftSelected.FullPath).Length > maxSize || new FileInfo(rightSelected.FullPath).Length > maxSize)
         {
-            MessageBox.Show("One of the files is too large for diff (max 5 MB each).",
-                "File Diff", MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Instance.Warn("One of the files is too large for diff (max 5 MB each).", "File Diff");
             return;
         }
 
@@ -700,7 +693,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.ToString(), "File Diff Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            NotificationService.Instance.Error(ex.Message, "File Diff Error");
         }
     }
 
@@ -1489,5 +1482,15 @@ public partial class MainWindow : Window
     private void FocusFolderTree()
     {
         FolderTreeView.Focus();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  TOAST NOTIFICATIONS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private void ToastDismiss_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && fe.Tag is NotificationItem item)
+            NotificationService.Instance.Dismiss(item);
     }
 }

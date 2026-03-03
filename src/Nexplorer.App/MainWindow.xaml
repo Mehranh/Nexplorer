@@ -18,6 +18,8 @@
         KeyboardNavigation.DirectionalNavigation="None">
 
     <Window.Resources>
+        <CubicEase x:Key="ToastEase" EasingMode="EaseOut"/>
+
         <Style x:Key="PaneContainer" TargetType="Border">
             <Setter Property="Background"     Value="{DynamicResource PaneBg}"/>
             <Setter Property="BorderThickness" Value="2,0,0,0"/>
@@ -359,6 +361,7 @@
 
     </Window.Resources>
 
+    <Grid>
     <DockPanel>
 
         <!-- ══════════════ BOTTOM: F-KEY TOOLBAR ══════════════ -->
@@ -2443,4 +2446,92 @@
             </Grid>
         </Grid>
     </DockPanel>
+
+    <!-- ══════════════ TOAST NOTIFICATIONS OVERLAY ══════════════ -->
+    <ItemsControl x:Name="ToastHost"
+                  ItemsSource="{Binding Source={x:Static svc:NotificationService.Instance}, Path=Notifications}"
+                  IsHitTestVisible="True"
+                  VerticalAlignment="Top" HorizontalAlignment="Right"
+                  Margin="0,8,16,0"
+                  Panel.ZIndex="9999">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type svc:NotificationItem}">
+                <Border x:Name="ToastBorder" Margin="0,0,0,6" CornerRadius="6"
+                        MinWidth="300" MaxWidth="380"
+                        Background="{DynamicResource PaneBg}"
+                        BorderThickness="1,1,1,1"
+                        BorderBrush="{Binding Type, Converter={StaticResource NotificationTypeToBrushConverter}}"
+                        Opacity="0"
+                        RenderTransformOrigin="1,0">
+                    <Border.RenderTransform>
+                        <TranslateTransform X="40"/>
+                    </Border.RenderTransform>
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.4" Color="Black" Direction="270"/>
+                    </Border.Effect>
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="0" To="1" Duration="0:0:0.25"
+                                                     EasingFunction="{StaticResource ToastEase}"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                     From="40" To="0" Duration="0:0:0.25"
+                                                     EasingFunction="{StaticResource ToastEase}"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <DockPanel Margin="12,10">
+                        <!-- Accent stripe icon -->
+                        <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,0,10,0"
+                                Background="{Binding Type, Converter={StaticResource NotificationTypeToBrushConverter}}"/>
+                        <!-- Dismiss button -->
+                        <Button DockPanel.Dock="Right" VerticalAlignment="Top" Margin="8,0,0,0"
+                                Cursor="Hand" Click="ToastDismiss_Click" Tag="{Binding}"
+                                Background="Transparent" BorderThickness="0" Padding="2">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent" Padding="2">
+                                        <iconPacks:PackIconMaterial x:Name="DismissIcon" Kind="Close" Width="12" Height="12"
+                                                                    Foreground="{DynamicResource SubTextFg}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="DismissIcon" Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <!-- Content -->
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextFg}" TextTrimming="CharacterEllipsis">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Title}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Text="{Binding Message}" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource SubTextFg}" Margin="0,2,0,0"
+                                       MaxHeight="60" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    </Grid>
 </Window>

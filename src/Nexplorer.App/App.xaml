@@ -23,6 +23,12 @@
             <conv:DurationToStringConverter           x:Key="DurationToStringConverter" />
             <conv:ViewModeToVisibilityConverter       x:Key="ViewModeToVisibilityConverter" />
             <conv:ViewModeNotEqualToVisibilityConverter x:Key="ViewModeNotEqualToVisibilityConverter" />
+            <conv:NotificationTypeToBrushConverter x:Key="NotificationTypeToBrushConverter" />
+            <conv:NotificationTypeToIconConverter  x:Key="NotificationTypeToIconConverter" />
+
+            <!-- ── Shared effects ────────────────────────────────────────── -->
+            <DropShadowEffect x:Key="DialogShadow" BlurRadius="24" ShadowDepth="4"
+                              Opacity="0.5" Color="Black" Direction="270"/>
 
             <!-- ── Colour palette ─────────────────────────────────────────── -->
             <SolidColorBrush x:Key="AppBg"          Color="#1C1C1C"/>

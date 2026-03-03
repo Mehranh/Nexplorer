@@ -230,13 +230,10 @@ public sealed partial class SettingsViewModel : ObservableObject
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     UpdateStatus = $"v{update.Version} available!";
-                    var result = System.Windows.MessageBox.Show(
+                    if (NotificationService.Instance.Confirm(
                         $"Nexplorer v{update.Version} is available (you have v{UpdateService.CurrentVersion.ToString(3)}).\n\n" +
                         $"{update.ReleaseNotes}\n\nWould you like to download it now?",
-                        "Update Available",
-                        System.Windows.MessageBoxButton.YesNo,
-                        System.Windows.MessageBoxImage.Information);
-                    if (result == System.Windows.MessageBoxResult.Yes)
+                        "Update Available"))
                         Process.Start(new ProcessStartInfo(update.DownloadUrl) { UseShellExecute = true });
                 });
             }

@@ -396,8 +396,7 @@ public sealed partial class PaneViewModel : ObservableObject
             ? $"Move '{targets[0].Name}' to Recycle Bin?"
             : $"Move {targets.Count} items to Recycle Bin?";
 
-        if (MessageBox.Show(msg, "Delete", MessageBoxButton.YesNo,
-                MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (!NotificationService.Instance.Confirm(msg, "Delete"))
             return;
 
         FileOperationService.RecycleAll(targets.Select(f => f.FullPath));

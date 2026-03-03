@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using Nexplorer.App.Services;
 using Nexplorer.App.ViewModels;
 
 namespace Nexplorer.App.Converters;
@@ -376,6 +377,50 @@ public sealed class CategoryKeyToVisibilityConverter : IValueConverter
            && string.Equals(key, target, StringComparison.OrdinalIgnoreCase)
             ? Visibility.Visible
             : Visibility.Collapsed;
+
+    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+        => throw new NotSupportedException();
+}
+
+// ── NotificationType → accent colour ────────────────────────────────────────
+
+[ValueConversion(typeof(NotificationType), typeof(Brush))]
+public sealed class NotificationTypeToBrushConverter : IValueConverter
+{
+    private static readonly Brush InfoBrush    = new SolidColorBrush(Color.FromRgb(0x00, 0x78, 0xD4));
+    private static readonly Brush SuccessBrush = new SolidColorBrush(Color.FromRgb(0x16, 0xA3, 0x4A));
+    private static readonly Brush WarnBrush    = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B));
+    private static readonly Brush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xDC, 0x26, 0x26));
+
+    static NotificationTypeToBrushConverter()
+    {
+        InfoBrush.Freeze(); SuccessBrush.Freeze(); WarnBrush.Freeze(); ErrorBrush.Freeze();
+    }
+
+    public object Convert(object value, Type _, object __, CultureInfo ___)
+        => value is NotificationType t ? t switch
+        {
+            NotificationType.Success => SuccessBrush,
+            NotificationType.Warning => WarnBrush,
+            NotificationType.Error   => ErrorBrush,
+            _                        => InfoBrush,
+        } : InfoBrush;
+
+    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+        => throw new NotSupportedException();
+}
+
+[ValueConversion(typeof(NotificationType), typeof(string))]
+public sealed class NotificationTypeToIconConverter : IValueConverter
+{
+    public object Convert(object value, Type _, object __, CultureInfo ___)
+        => value is NotificationType t ? t switch
+        {
+            NotificationType.Success => "CheckCircleOutline",
+            NotificationType.Warning => "AlertOutline",
+            NotificationType.Error   => "CloseCircleOutline",
+            _                        => "InformationOutline",
+        } : "InformationOutline";
 
     public object ConvertBack(object v, Type t, object p, CultureInfo c)
         => throw new NotSupportedException();

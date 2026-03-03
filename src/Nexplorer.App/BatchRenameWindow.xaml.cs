@@ -79,8 +79,7 @@ public partial class BatchRenameWindow : Window
 
         Renamed = true;
         if (errors > 0)
-            MessageBox.Show($"{errors} file(s) could not be renamed.", "Batch Rename",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Instance.Warn($"{errors} file(s) could not be renamed.", "Batch Rename");
 
         DialogResult = true;
         Close();
