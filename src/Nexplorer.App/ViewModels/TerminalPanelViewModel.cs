@@ -55,6 +55,8 @@ public sealed partial class TerminalPanelViewModel : ObservableObject
     public ObservableCollection<CommandHistoryEntry> SharedHistory { get; }
     public AliasService AliasService => _aliasService;
 
+    public void SaveHistory() => _historyStore.Save(SharedHistory);
+
     // ─── Profiles ─────────────────────────────────────────────────────────────
 
     public IReadOnlyList<TerminalProfile> Profiles => _profileService.Profiles;

@@ -231,6 +231,24 @@ public partial class MainWindow : Window
             Vm.LoadHistoryEntryCommand.Execute(entry);
     }
 
+    private void FavoritesList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (FavoritesList.SelectedItem is CommandHistoryEntry entry)
+            Vm.LoadHistoryEntryCommand.Execute(entry);
+    }
+
+    private void HistorySidebarTab_History_Click(object sender, MouseButtonEventArgs e)
+        => Vm.SwitchHistorySidebarTabCommand.Execute("History");
+
+    private void HistorySidebarTab_Favorites_Click(object sender, MouseButtonEventArgs e)
+        => Vm.SwitchHistorySidebarTabCommand.Execute("Favorites");
+
+    private void HistoryItem_ToggleFavorite_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem mi && mi.Tag is CommandHistoryEntry entry)
+            Vm.ToggleFavoriteCommand.Execute(entry);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     //  SELECTION SYNC
     // ═══════════════════════════════════════════════════════════════════════

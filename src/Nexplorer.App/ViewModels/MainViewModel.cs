@@ -80,6 +80,11 @@ public sealed partial class MainViewModel : ObservableObject
             new SortDescription(nameof(CommandHistoryEntry.Timestamp), ListSortDirection.Descending));
         HistoryView.Filter = FilterHistory;
 
+        FavoritesView = new CollectionViewSource { Source = History }.View;
+        FavoritesView.SortDescriptions.Add(
+            new SortDescription(nameof(CommandHistoryEntry.Timestamp), ListSortDirection.Descending));
+        FavoritesView.Filter = FilterFavorites;
+
         _ = LeftPane.GoToAsync(startPath,  pushHistory: false);
         _ = RightPane.GoToAsync(startPath, pushHistory: false);
 
@@ -538,8 +543,10 @@ public sealed partial class MainViewModel : ObservableObject
     // ─── History ─────────────────────────────────────────────────────────────
 
     [ObservableProperty] private string _historyFilterText = string.Empty;
+    [ObservableProperty] private string _activeHistorySidebarTab = "History";
 
     public ICollectionView HistoryView { get; }
+    public ICollectionView FavoritesView { get; }
     public ObservableCollection<CommandHistoryEntry> History { get; } = new();
 
     private bool FilterHistory(object obj)
@@ -551,10 +558,37 @@ public sealed partial class MainViewModel : ObservableObject
             || e.WorkingDirectory.Contains(f, StringComparison.OrdinalIgnoreCase);
     }
 
-    partial void OnHistoryFilterTextChanged(string value) => HistoryView.Refresh();
+    private bool FilterFavorites(object obj)
+    {
+        if (obj is not CommandHistoryEntry e || !e.IsPinned) return false;
+        var f = HistoryFilterText;
+        return string.IsNullOrWhiteSpace(f)
+            || e.Command.Contains(f,          StringComparison.OrdinalIgnoreCase)
+            || e.WorkingDirectory.Contains(f, StringComparison.OrdinalIgnoreCase);
+    }
+
+    partial void OnHistoryFilterTextChanged(string value)
+    {
+        HistoryView.Refresh();
+        FavoritesView.Refresh();
+    }
 
     [RelayCommand]
     private void ClearHistoryFilter() => HistoryFilterText = string.Empty;
+
+    [RelayCommand]
+    private void SwitchHistorySidebarTab(string tab) => ActiveHistorySidebarTab = tab;
+
+    [RelayCommand]
+    private void ToggleFavorite(object? parameter)
+    {
+        if (parameter is not CommandHistoryEntry entry) return;
+        var idx = History.IndexOf(entry);
+        if (idx < 0) return;
+        History[idx] = entry with { IsPinned = !entry.IsPinned };
+        TerminalPanel.SaveHistory();
+        FavoritesView.Refresh();
+    }
 
     // ─── Run command (delegates to active terminal tab) ────────────────────────
 

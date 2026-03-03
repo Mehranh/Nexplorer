@@ -2376,29 +2376,197 @@
                             Background="{DynamicResource AppBg}"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                         <DockPanel>
+                            <!-- Tab strip: History / Favorites -->
                             <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBg}"
-                                    Padding="6,4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-                                <DockPanel>
-                                    <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="History"
-                                                                Width="13" Height="13" Margin="0,0,6,0"
-                                                                Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center"/>
-                                    <TextBlock DockPanel.Dock="Left" Text="History" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBox Text="{Binding HistoryFilterText, UpdateSourceTrigger=PropertyChanged}"
-                                             FontSize="11.5" VerticalContentAlignment="Center">
-                                        <TextBox.InputBindings>
-                                            <KeyBinding Key="Escape" Command="{Binding ClearHistoryFilterCommand}"/>
-                                        </TextBox.InputBindings>
-                                    </TextBox>
-                                </DockPanel>
+                                    Padding="4,3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border MouseLeftButtonDown="HistorySidebarTab_History_Click" Cursor="Hand"
+                                            Padding="8,3" CornerRadius="3" Margin="0,0,2,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ActiveHistorySidebarTab}" Value="History">
+                                                        <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="History"
+                                                                        Width="12" Height="12" Margin="0,0,5,0"
+                                                                        Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="History" FontSize="11" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource SubTextFg}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ActiveHistorySidebarTab}" Value="History">
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border MouseLeftButtonDown="HistorySidebarTab_Favorites_Click" Cursor="Hand"
+                                            Padding="8,3" CornerRadius="3">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ActiveHistorySidebarTab}" Value="Favorites">
+                                                        <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="Star"
+                                                                        Width="12" Height="12" Margin="0,0,5,0"
+                                                                        Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Favorites" FontSize="11" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource SubTextFg}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ActiveHistorySidebarTab}" Value="Favorites">
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
                             </Border>
+                            <!-- Filter box -->
+                            <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBg}"
+                                    Padding="6,3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <TextBox Text="{Binding HistoryFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                         FontSize="11.5" VerticalContentAlignment="Center">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Escape" Command="{Binding ClearHistoryFilterCommand}"/>
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </Border>
+                            <!-- History / Favorites lists (stacked in a Grid so both can fill) -->
+                            <Grid>
+                            <!-- History list (visible when History tab active) -->
                             <ListBox x:Name="HistoryList" ItemsSource="{Binding HistoryView}"
                                      Background="{DynamicResource AppBg}" BorderThickness="0"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                      MouseDoubleClick="HistoryList_MouseDoubleClick">
+                                <ListBox.Style>
+                                    <Style TargetType="ListBox">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ActiveHistorySidebarTab}" Value="Favorites">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.Style>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="0,1">
+                                            <Grid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Toggle Favorite" Click="HistoryItem_ToggleFavorite_Click"
+                                                              Tag="{Binding}"/>
+                                                </ContextMenu>
+                                            </Grid.ContextMenu>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="4"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Width="4" CornerRadius="2"
+                                                    Background="{Binding ExitCode, Converter={StaticResource ExitCodeBrushConverter}}"
+                                                    Margin="0,3"/>
+                                            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="6,0,0,0">
+                                                <DockPanel>
+                                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Duration, Converter={StaticResource DurationToStringConverter}}"
+                                                               FontSize="10" Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Duration}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Command}"
+                                                               FontFamily="Cascadia Code,Consolas" FontSize="11.5"
+                                                               TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextFg}"/>
+                                                </DockPanel>
+                                                <DockPanel>
+                                                    <TextBlock DockPanel.Dock="Right" FontSize="10" Foreground="{DynamicResource SubTextFg}"
+                                                               VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value=""/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ExitCode}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding WorkingDirectory}" FontSize="10.5"
+                                                               TextTrimming="CharacterEllipsis" Foreground="{DynamicResource SubTextFg}" Margin="0,1,0,0"/>
+                                                </DockPanel>
+                                            </StackPanel>
+                                            <!-- Favorite star indicator -->
+                                            <iconPacks:PackIconMaterial Grid.Column="2" Kind="Star"
+                                                                        Width="10" Height="10" Margin="4,0,2,0"
+                                                                        VerticalAlignment="Center"
+                                                                        Foreground="#FFD700">
+                                                <iconPacks:PackIconMaterial.Style>
+                                                    <Style TargetType="iconPacks:PackIconMaterial">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </iconPacks:PackIconMaterial.Style>
+                                            </iconPacks:PackIconMaterial>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <!-- Favorites list (visible when Favorites tab active) -->
+                            <ListBox x:Name="FavoritesList" ItemsSource="{Binding FavoritesView}"
+                                     Background="{DynamicResource AppBg}" BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     MouseDoubleClick="FavoritesList_MouseDoubleClick">
+                                <ListBox.Style>
+                                    <Style TargetType="ListBox">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ActiveHistorySidebarTab}" Value="Favorites">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.Style>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Remove from Favorites" Click="HistoryItem_ToggleFavorite_Click"
+                                                              Tag="{Binding}"/>
+                                                </ContextMenu>
+                                            </Grid.ContextMenu>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="4"/>
                                                 <ColumnDefinition Width="*"/>
@@ -2446,6 +2614,7 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
+                            </Grid>
                         </DockPanel>
                     </Border>
                 </Grid>
