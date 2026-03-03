@@ -726,6 +726,20 @@ public partial class MainWindow : Window
     private void SettingsButton_Click(object sender, RoutedEventArgs e) => OpenSettings();
 
     // ═══════════════════════════════════════════════════════════════════════
+    //  SPACE RADAR
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private void SpaceRadar_Click(object sender, RoutedEventArgs e) => OpenSpaceRadar();
+
+    private void OpenSpaceRadar()
+    {
+        var path = Vm.ActivePane.CurrentPath;
+        if (string.IsNullOrEmpty(path)) return;
+        var win = new SpaceRadarWindow(path) { Owner = this };
+        win.Show();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  PREVIEW PANE
     // ═══════════════════════════════════════════════════════════════════════
 
@@ -1356,6 +1370,10 @@ public partial class MainWindow : Window
         // ── Git History (Ctrl+G) ──
         if (e.Key == Key.G && Keyboard.Modifiers == ModifierKeys.Control && !IsTextInputFocused())
         { _ = Vm.ShowGitHistoryCommand.ExecuteAsync(null); e.Handled = true; return; }
+
+        // ── Space Radar (Ctrl+Shift+R) ──
+        if (e.Key == Key.R && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && !IsTextInputFocused())
+        { OpenSpaceRadar(); e.Handled = true; return; }
 
         // ── Tab management ──
         var tabs = Vm.ActivePane == Vm.LeftPane ? Vm.LeftTabs : Vm.RightTabs;

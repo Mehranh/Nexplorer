@@ -38,6 +38,7 @@ Nexplorer combines the power of **Directory Opus**-style advanced file managemen
   - [File Diff](#file-diff)
   - [Git Integration](#git-integration)
   - [Preview Pane](#preview-pane)
+  - [Space Radar](#space-radar)
   - [Themes](#themes)
   - [Auto-Update](#auto-update)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
@@ -57,6 +58,7 @@ Nexplorer combines the power of **Directory Opus**-style advanced file managemen
 | **Embedded terminal** | Multi-tab PowerShell/CMD with ANSI colors, auto-complete, and aliases |
 | **Keyboard-first** | 40+ shortcuts, Far Manager-style F-key toolbar, rebindable keys |
 | **Git built-in** | Source control panel, commit/push/pull, log viewer, file diffs |
+| **Space Radar** | Interactive treemap visualization of disk usage — drill down into any folder |
 | **Blazing fast** | Async streaming enumeration, UI virtualization, handles 500k+ files |
 | **4 themes** | Dark, Light, Modern, and System (auto-detect) |
 
@@ -218,6 +220,19 @@ Toggle with `F8`:
 - **Directory info** — shows contained item count
 - **Metadata** — file name, type, size, modified date
 
+### Space Radar
+
+A built-in **disk space analyzer** with interactive treemap visualization (`Ctrl+Shift+R`). Think WinDirStat/SpaceSniffer — right inside your file explorer.
+
+- **Squarified treemap** — every file and folder rendered as a proportionally-sized rectangle
+- **Color-coded by file type** — images (teal), video (salmon), audio (pink), archives (gold), code (blue), documents (red), executables (yellow), data (green)
+- **Async scanning** — live progress counter (files scanned + total bytes), never blocks the UI
+- **Drill-down navigation** — click any folder to zoom in, Backspace to go back, with breadcrumb trail
+- **Hover tooltips** — follow the mouse showing name, size, % of parent, and descendant counts
+- **Keyboard-first** — `Backspace` goes back, `F5` rescans, `Escape` closes
+- **Full cancellation support** — closing the window instantly cancels the scan
+- **Theme-aware** — follows the app's active theme using dynamic resource brushes
+
 ### Themes
 
 | Theme | Description |
@@ -255,6 +270,7 @@ Toggle with `F8`:
 | `Ctrl+D` | File diff / Duplicate tab |
 | `Ctrl+F` | Toggle quick filter |
 | `Ctrl+G` | Git history |
+| `Ctrl+Shift+R` | Space Radar (disk treemap) |
 | `Ctrl+M` | Batch rename |
 | `Ctrl+N` | New file |
 | `Ctrl+R` | Refresh |
