@@ -9,7 +9,7 @@
 [![.NET](https://img.shields.io/badge/.NET-10.0-purple?style=flat-square)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![License](https://img.shields.io/github/license/Mehranh/Nexplorer?style=flat-square)](LICENSE)
 
-[Download v1.0.15](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi) · [Website](https://mehranh.github.io/Nexplorer/) · [Report a Bug](https://github.com/Mehranh/Nexplorer/issues)
+[Download v1.0.16](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi) · [Website](https://mehranh.github.io/Nexplorer/) · [Report a Bug](https://github.com/Mehranh/Nexplorer/issues)
 
 </div>
 
@@ -339,7 +339,7 @@ tests/
 
 Download the latest MSI installer from the [Releases](https://github.com/Mehranh/Nexplorer/releases/latest) page:
 
-[**Download Nexplorer v1.0.15**](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi)
+[**Download Nexplorer v1.0.16**](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi)
 
 ---
 
