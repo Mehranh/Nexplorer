@@ -9,6 +9,8 @@ namespace Nexplorer.App.Services;
 /// </summary>
 public sealed class AliasService
 {
+    private static readonly JsonSerializerOptions s_writeIndentedOptions = new() { WriteIndented = true };
+
     private static readonly string FilePath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                      "Nexplorer", "aliases.json");
@@ -85,7 +87,7 @@ public sealed class AliasService
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-            var json = JsonSerializer.Serialize(_aliases, new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(_aliases, s_writeIndentedOptions);
             File.WriteAllText(FilePath, json);
         }
         catch { /* best-effort */ }

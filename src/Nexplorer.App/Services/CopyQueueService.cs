@@ -9,7 +9,7 @@ public enum ConflictResolution { Skip, Replace, Rename, Ask }
 public enum CopyJobStatus { Queued, Running, Paused, Completed, Failed, Cancelled }
 
 /// <summary>A single copy/move operation in the queue.</summary>
-public sealed partial class CopyJob : ObservableObject
+public sealed partial class CopyJob : ObservableObject, IDisposable
 {
     public string             Id          { get; } = Guid.NewGuid().ToString("N");
     public IReadOnlyList<string> Sources  { get; init; } = Array.Empty<string>();
@@ -32,10 +32,17 @@ public sealed partial class CopyJob : ObservableObject
 
     /// <summary>Blocks if paused. Call from the worker thread.</summary>
     public void WaitIfPaused() => _pauseGate.Wait(Cts.Token);
+
+    public void Dispose()
+    {
+        Cts.Cancel();
+        Cts.Dispose();
+        _pauseGate.Dispose();
+    }
 }
 
 /// <summary>Global copy/move queue with concurrency of 1.</summary>
-public sealed class CopyQueueService
+public sealed class CopyQueueService : IDisposable
 {
     private static readonly Lazy<CopyQueueService> _instance = new(() => new CopyQueueService());
     public static CopyQueueService Instance => _instance.Value;
@@ -140,7 +147,7 @@ public sealed class CopyQueueService
         }
     }
 
-    private async Task ProcessFileAsync(string src, string dest, CopyJob job)
+    private static async Task ProcessFileAsync(string src, string dest, CopyJob job)
     {
         if (dest == "__SKIP__") return;
 
@@ -220,6 +227,8 @@ public sealed class CopyQueueService
         catch { }
         return size;
     }
+
+    public void Dispose() => _semaphore.Dispose();
 }
 
 public sealed class ConflictEventArgs : EventArgs

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -43,7 +44,7 @@ public class AnsiRichTextBox : RichTextBox
             if (val != null) return val;
             // Fall back to theme TextFg color
             if (Application.Current.Resources["TextFg"] is SolidColorBrush b)
-                return b.Color.ToString();
+                return b.Color.ToString(CultureInfo.InvariantCulture);
             return "#CCCCCC";
         }
         set => SetValue(DefaultForegroundColorProperty, value);

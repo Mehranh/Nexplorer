@@ -101,8 +101,11 @@ public sealed partial class MainViewModel : ObservableObject
 
     // ─── Click mode ───────────────────────────────────────────────────────────
 
+    // Bound in XAML – must remain instance member
+#pragma warning disable CA1822
     public bool IsSingleClickMode
         => App.SettingsService.Current.General.ClickMode == Services.Settings.ClickMode.SingleClick;
+#pragma warning restore CA1822
 
     // ─── Pane / Tab accessors ─────────────────────────────────────────────────
 
@@ -211,7 +214,10 @@ public sealed partial class MainViewModel : ObservableObject
 
     // ─── Copy queue ───────────────────────────────────────────────────────────
 
+    // Bound in XAML – must remain instance member
+#pragma warning disable CA1822
     public CopyQueueService CopyQueue => CopyQueueService.Instance;
+#pragma warning restore CA1822
 
     // ─── Favorites ────────────────────────────────────────────────────────────
 

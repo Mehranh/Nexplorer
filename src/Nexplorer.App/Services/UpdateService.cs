@@ -18,6 +18,8 @@ public sealed record UpdateCheckResult(UpdateCheckStatus Status, UpdateInfo? Upd
 
 public sealed class UpdateService
 {
+    private static readonly JsonSerializerOptions s_jsonOptions = new() { PropertyNameCaseInsensitive = true };
+
     private static readonly string[] VersionUrls =
     [
         "https://mehranh.github.io/Nexplorer/version.json",
@@ -40,7 +42,7 @@ public sealed class UpdateService
     private static Version NormalizeVersion(Version v) =>
         new(v.Major, v.Minor, Math.Max(v.Build, 0));
 
-    public async Task<UpdateCheckResult> CheckForUpdateAsync()
+    public static async Task<UpdateCheckResult> CheckForUpdateAsync()
     {
         try
         {
@@ -50,8 +52,7 @@ public sealed class UpdateService
                 return new UpdateCheckResult(UpdateCheckStatus.Failed);
             }
 
-            var info = JsonSerializer.Deserialize<UpdateInfo>(json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var info = JsonSerializer.Deserialize<UpdateInfo>(json, s_jsonOptions);
 
             if (info is null) return new UpdateCheckResult(UpdateCheckStatus.Failed);
 

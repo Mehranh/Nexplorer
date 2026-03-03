@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 
 namespace Nexplorer.App.Services;
@@ -24,7 +25,7 @@ public static class GitBranchService
             try
             {
                 var headContent = File.ReadAllText(headPath).Trim();
-                if (headContent.StartsWith("ref: refs/heads/"))
+                if (headContent.StartsWith("ref: refs/heads/", StringComparison.Ordinal))
                     return headContent["ref: refs/heads/".Length..];
                 if (headContent.Length >= 7)
                     return headContent[..7]; // detached HEAD
@@ -79,8 +80,8 @@ public static class GitBranchService
             var firstLine = lines.Length > 0 ? lines[0] : string.Empty;
             var aheadMatch = System.Text.RegularExpressions.Regex.Match(firstLine, @"\[ahead (\d+)");
             var behindMatch = System.Text.RegularExpressions.Regex.Match(firstLine, @"behind (\d+)");
-            if (aheadMatch.Success) ahead = int.Parse(aheadMatch.Groups[1].Value);
-            if (behindMatch.Success) behind = int.Parse(behindMatch.Groups[1].Value);
+            if (aheadMatch.Success) ahead = int.Parse(aheadMatch.Groups[1].Value, CultureInfo.InvariantCulture);
+            if (behindMatch.Success) behind = int.Parse(behindMatch.Groups[1].Value, CultureInfo.InvariantCulture);
 
             return new GitBranchInfo(branch, dirty, ahead, behind, staged);
         }
@@ -107,7 +108,7 @@ public static class GitBranchService
                 try
                 {
                     var content = File.ReadAllText(gitDir).Trim();
-                    if (content.StartsWith("gitdir: "))
+                    if (content.StartsWith("gitdir: ", StringComparison.Ordinal))
                     {
                         var actualGitDir = content["gitdir: ".Length..];
                         if (!Path.IsPathRooted(actualGitDir))

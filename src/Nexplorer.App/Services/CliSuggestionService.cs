@@ -126,7 +126,7 @@ public static class CliSuggestionService
 
     // ─── Internal helpers ─────────────────────────────────────────────────────
 
-    private static IReadOnlyList<SuggestionItem> MatchToolNames(
+    private static List<SuggestionItem> MatchToolNames(
         string prefix, int maxItems)
     {
         var results = new List<SuggestionItem>();
@@ -148,7 +148,7 @@ public static class CliSuggestionService
     /// if we're still at tool root) and how many tokens were consumed.
     /// </summary>
     private static (CliCommand? Node, int Depth) ResolveCommandContext(
-        CliToolDefinition tool, IReadOnlyList<string> parts)
+        CliToolDefinition tool, List<string> parts)
     {
         var subcommands = tool.Subcommands;
         CliCommand? current = null;
@@ -230,7 +230,7 @@ public static class CliSuggestionService
     /// <summary>
     /// Simple shell-style tokenizer: splits on whitespace, respects double/single quotes.
     /// </summary>
-    private static IReadOnlyList<string> TokenizeInput(string input)
+    private static List<string> TokenizeInput(string input)
     {
         var tokens = new List<string>();
         var current = new System.Text.StringBuilder();

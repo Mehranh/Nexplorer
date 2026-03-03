@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Nexplorer.App.Services;
@@ -69,7 +70,7 @@ public static class BatchRenameService
             // Counter
             if (spec.AddCounter)
             {
-                var formatted = counter.ToString().PadLeft(spec.CounterPadding, '0');
+                var formatted = counter.ToString(CultureInfo.InvariantCulture).PadLeft(spec.CounterPadding, '0');
                 baseName += formatted;
                 counter += spec.CounterStep;
             }
@@ -80,7 +81,7 @@ public static class BatchRenameService
                 CaseTransform.Lower     => baseName.ToLowerInvariant(),
                 CaseTransform.Upper     => baseName.ToUpperInvariant(),
                 CaseTransform.TitleCase => System.Globalization.CultureInfo.CurrentCulture
-                                                .TextInfo.ToTitleCase(baseName.ToLower()),
+                                                .TextInfo.ToTitleCase(baseName.ToLower(CultureInfo.CurrentCulture)),
                 _ => baseName,
             };
 

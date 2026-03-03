@@ -76,7 +76,7 @@ public static class GitHistoryService
                 var trimmed = line.Trim();
                 if (string.IsNullOrEmpty(trimmed)) continue;
 
-                if (trimmed.StartsWith("* "))
+                if (trimmed.StartsWith("* ", StringComparison.Ordinal))
                 {
                     current = trimmed[2..].Trim();
                     // skip detached HEAD markers like "* (HEAD detached at ...)"
@@ -106,8 +106,8 @@ public static class GitHistoryService
         string workingDirectory,
         string? filePath = null,
         int maxCount = 200,
-        CancellationToken ct = default,
-        string? branch = null)
+        string? branch = null,
+        CancellationToken ct = default)
     {
         var args = $"log --format=\"{LogFormat}\" -n {maxCount}";
         if (!string.IsNullOrEmpty(branch))
@@ -329,7 +329,8 @@ public static class GitHistoryService
         var parts = line.Split('|', 6);
         if (parts.Length < 6) return null;
 
-        DateTimeOffset.TryParse(parts[4], out var date);
+        if (!DateTimeOffset.TryParse(parts[4], out var date))
+            date = default;
 
         return new GitLogEntry(
             Hash:         parts[0],

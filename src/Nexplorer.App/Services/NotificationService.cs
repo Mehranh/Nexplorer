@@ -58,7 +58,7 @@ public sealed class NotificationService
     /// <summary>
     /// Shows a styled confirmation dialog on the UI thread and returns the user's choice.
     /// </summary>
-    public bool Confirm(string message, string title = "Confirm")
+    public static bool Confirm(string message, string title = "Confirm")
     {
         return Application.Current.Dispatcher.Invoke(() =>
         {

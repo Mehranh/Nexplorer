@@ -6,11 +6,13 @@ namespace Nexplorer.App.Services;
 /// <summary>Persists folder favorites to a JSON file in %LocalAppData%.</summary>
 public sealed class FavoritesService
 {
+    private static readonly JsonSerializerOptions s_writeIndentedOptions = new() { WriteIndented = true };
+
     private static readonly string FilePath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                      "Nexplorer", "favorites.json");
 
-    public List<string> Load()
+    public static List<string> Load()
     {
         try
         {
@@ -21,13 +23,12 @@ public sealed class FavoritesService
         catch { return new(); }
     }
 
-    public void Save(IEnumerable<string> paths)
+    public static void Save(IEnumerable<string> paths)
     {
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-            var json = JsonSerializer.Serialize(paths.ToList(),
-                new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(paths.ToList(), s_writeIndentedOptions);
             File.WriteAllText(FilePath, json);
         }
         catch { /* swallow */ }

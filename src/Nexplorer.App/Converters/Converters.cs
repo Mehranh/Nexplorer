@@ -16,11 +16,11 @@ public sealed class BoolToVisibilityConverter : IValueConverter
 {
     public static readonly BoolToVisibilityConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is true ? Visibility.Visible : Visibility.Collapsed;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
-        => (Visibility)v == Visibility.Visible;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => (Visibility)value == Visibility.Visible;
 }
 
 /// <summary>true  → <see cref="Visibility.Collapsed"/>, false → Visible.</summary>
@@ -29,11 +29,11 @@ public sealed class InverseBoolToVisibilityConverter : IValueConverter
 {
     public static readonly InverseBoolToVisibilityConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is true ? Visibility.Collapsed : Visibility.Visible;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
-        => (Visibility)v != Visibility.Visible;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => (Visibility)value != Visibility.Visible;
 }
 
 // ── null/empty → Visibility ─────────────────────────────────────────────────
@@ -44,10 +44,10 @@ public sealed class NullToVisibilityConverter : IValueConverter
 {
     public static readonly NullToVisibilityConverter Instance = new();
 
-    public object Convert(object? value, Type _, object? __, CultureInfo ___)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is null or "" ? Visibility.Collapsed : Visibility.Visible;
 
-    public object ConvertBack(object v, Type t, object? p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -59,7 +59,7 @@ public sealed class TabActiveBrushConverter : IValueConverter
 {
     public static readonly TabActiveBrushConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var res = Application.Current.Resources;
         if (value is true)
@@ -67,7 +67,7 @@ public sealed class TabActiveBrushConverter : IValueConverter
         return res["HeaderBg"] as Brush ?? Brushes.LightGray;
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -79,10 +79,10 @@ public sealed class FileIconConverter : IValueConverter
 {
     public static readonly FileIconConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is true ? "\uE8B7" : "\uE8A5"; // folder / document
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
 /// <summary>bool (IsDirectory) → folder amber / file blue brush</summary>
@@ -102,7 +102,7 @@ public sealed class FileIconColorConverter : IValueConverter
         FolderBrushLight.Freeze(); FileBrushLight.Freeze();
     }
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var isLight = IsLightTheme();
         if (value is true)
@@ -110,7 +110,7 @@ public sealed class FileIconColorConverter : IValueConverter
         return isLight ? FileBrushLight : FileBrushDark;
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 
     internal static bool IsLightTheme()
     {
@@ -138,10 +138,10 @@ public sealed class ExitCodeBrushConverter : IValueConverter
         OkBrush.Freeze(); ErrBrush.Freeze(); NullBrush.Freeze();
     }
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is null ? NullBrush : (int)value == 0 ? OkBrush : ErrBrush;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
 /// <summary>ShellKind → prompt foreground brush (cyan=PS, yellow=Cmd)</summary>
@@ -161,7 +161,7 @@ public sealed class ShellPromptColorConverter : IValueConverter
         PsBrushLight.Freeze(); CmdBrushLight.Freeze();
     }
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var isLight = FileIconColorConverter.IsLightTheme();
         return value is ShellKind.Cmd
@@ -169,7 +169,7 @@ public sealed class ShellPromptColorConverter : IValueConverter
             : (isLight ? PsBrushLight : PsBrushDark);
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
 /// <summary>SuggestionKind → accent brush for the popup icon.</summary>
@@ -193,7 +193,7 @@ public sealed class SuggestionKindColorConverter : IValueConverter
         HistoryBrushLight.Freeze(); FsBrushLight.Freeze(); BangBrushLight.Freeze(); CliBrushLight.Freeze();
     }
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var isLight = FileIconColorConverter.IsLightTheme();
         return value switch
@@ -204,7 +204,7 @@ public sealed class SuggestionKindColorConverter : IValueConverter
             _ => isLight ? HistoryBrushLight : HistoryBrushDark
         };
     }
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
 /// <summary>TimeSpan? Duration → human-readable string ("1.2s", "340ms", "").</summary>
@@ -213,7 +213,7 @@ public sealed class DurationToStringConverter : IValueConverter
 {
     public static readonly DurationToStringConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is not TimeSpan ts) return string.Empty;
         if (ts.TotalMinutes >= 1) return $"{ts.Minutes}m {ts.Seconds}.{ts.Milliseconds / 100}s";
@@ -221,7 +221,7 @@ public sealed class DurationToStringConverter : IValueConverter
         return $"{ts.TotalMilliseconds:F0}ms";
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
 /// <summary>bool IsRunning → "Stop" / "Run" button content</summary>
@@ -230,10 +230,10 @@ public sealed class RunningToButtonTextConverter : IValueConverter
 {
     public static readonly RunningToButtonTextConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is true ? "\uE71A" : "\uE768"; // Stop / Run (MDL2 glyphs)
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
 // ── Terminal split orientation → visibility ──────────────────────────────────
@@ -244,11 +244,11 @@ public sealed class SplitActiveToVisibilityConverter : IValueConverter
 {
     public static readonly SplitActiveToVisibilityConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is TerminalSplitOrientation o && o != TerminalSplitOrientation.None
             ? Visibility.Visible : Visibility.Collapsed;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -258,11 +258,11 @@ public sealed class SplitOrientationConverter : IValueConverter
 {
     public static readonly SplitOrientationConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is TerminalSplitOrientation.Horizontal
             ? Orientation.Horizontal : Orientation.Vertical;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -272,7 +272,7 @@ public sealed class HexToBrushConverter : IValueConverter
 {
     public static readonly HexToBrushConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is string hex && !string.IsNullOrEmpty(hex))
         {
@@ -287,7 +287,7 @@ public sealed class HexToBrushConverter : IValueConverter
         return Brushes.Transparent;
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -297,10 +297,10 @@ public sealed class GitBranchInfoToStringConverter : IValueConverter
 {
     public static readonly GitBranchInfoToStringConverter Instance = new();
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is Services.GitBranchInfo info ? $"\ue0a0 {info.FormatPrompt()}" : string.Empty;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -323,7 +323,7 @@ public sealed class GitBranchColorConverter : IValueConverter
         CleanBrushLight.Freeze(); DirtyBrushLight.Freeze(); NoBrushLight.Freeze();
     }
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var isLight = FileIconColorConverter.IsLightTheme();
         if (value is Services.GitBranchInfo info)
@@ -333,7 +333,7 @@ public sealed class GitBranchColorConverter : IValueConverter
         return isLight ? NoBrushLight : NoBrushDark;
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -345,7 +345,7 @@ public sealed class ViewModeToVisibilityConverter : IValueConverter
 {
     public static readonly ViewModeToVisibilityConverter Instance = new();
 
-    public object Convert(object value, Type _, object parameter, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is ViewModels.ViewMode mode
             && parameter is string s
@@ -354,7 +354,7 @@ public sealed class ViewModeToVisibilityConverter : IValueConverter
         return Visibility.Collapsed;
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -364,7 +364,7 @@ public sealed class ViewModeNotEqualToVisibilityConverter : IValueConverter
 {
     public static readonly ViewModeNotEqualToVisibilityConverter Instance = new();
 
-    public object Convert(object value, Type _, object parameter, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is ViewModels.ViewMode mode
             && parameter is string s
@@ -373,7 +373,7 @@ public sealed class ViewModeNotEqualToVisibilityConverter : IValueConverter
         return Visibility.Visible;
     }
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -389,14 +389,14 @@ public sealed class CategoryKeyToVisibilityConverter : IValueConverter
 {
     public static readonly CategoryKeyToVisibilityConverter Instance = new();
 
-    public object Convert(object value, Type _, object parameter, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is string key
            && parameter is string target
            && string.Equals(key, target, StringComparison.OrdinalIgnoreCase)
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
@@ -415,7 +415,7 @@ public sealed class NotificationTypeToBrushConverter : IValueConverter
         InfoBrush.Freeze(); SuccessBrush.Freeze(); WarnBrush.Freeze(); ErrorBrush.Freeze();
     }
 
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is NotificationType t ? t switch
         {
             NotificationType.Success => SuccessBrush,
@@ -424,14 +424,14 @@ public sealed class NotificationTypeToBrushConverter : IValueConverter
             _                        => InfoBrush,
         } : InfoBrush;
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
 [ValueConversion(typeof(NotificationType), typeof(string))]
 public sealed class NotificationTypeToIconConverter : IValueConverter
 {
-    public object Convert(object value, Type _, object __, CultureInfo ___)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is NotificationType t ? t switch
         {
             NotificationType.Success => "CheckCircleOutline",
@@ -440,6 +440,6 @@ public sealed class NotificationTypeToIconConverter : IValueConverter
             _                        => "InformationOutline",
         } : "InformationOutline";
 
-    public object ConvertBack(object v, Type t, object p, CultureInfo c)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }

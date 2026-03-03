@@ -21,7 +21,7 @@ public enum ViewMode
     Tiles
 }
 
-public sealed partial class PaneViewModel : ObservableObject
+public sealed partial class PaneViewModel : ObservableObject, IDisposable
 {
     private CancellationTokenSource? _navigateCts;
 
@@ -396,7 +396,7 @@ public sealed partial class PaneViewModel : ObservableObject
             ? $"Move '{targets[0].Name}' to Recycle Bin?"
             : $"Move {targets.Count} items to Recycle Bin?";
 
-        if (!NotificationService.Instance.Confirm(msg, "Delete"))
+        if (!NotificationService.Confirm(msg, "Delete"))
             return;
 
         FileOperationService.RecycleAll(targets.Select(f => f.FullPath));
@@ -563,5 +563,13 @@ public sealed partial class PaneViewModel : ObservableObject
             });
         }
         catch { /* swallow */ }
+    }
+
+    public void Dispose()
+    {
+        _navigateCts?.Cancel();
+        _navigateCts?.Dispose();
+        _refreshTimer?.Dispose();
+        StopWatcher();
     }
 }

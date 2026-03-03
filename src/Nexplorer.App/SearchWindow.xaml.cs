@@ -5,7 +5,7 @@ using Nexplorer.App.Services;
 
 namespace Nexplorer.App;
 
-public partial class SearchWindow : Window
+public partial class SearchWindow : Window, IDisposable
 {
     private CancellationTokenSource? _cts;
     private readonly List<FileInfo> _results = new();
@@ -83,5 +83,12 @@ public partial class SearchWindow : Window
         _cts?.Cancel();
         DialogResult = false;
         Close();
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

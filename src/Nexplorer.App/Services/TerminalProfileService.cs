@@ -9,6 +9,8 @@ namespace Nexplorer.App.Services;
 /// </summary>
 public sealed class TerminalProfileService
 {
+    private static readonly JsonSerializerOptions s_writeIndentedOptions = new() { WriteIndented = true };
+
     private const string PowerShellDefaultArguments = "-NoLogo -Command";
     private const string PowerShellLegacyArguments = "-NoLogo -NoProfile -NonInteractive -Command";
 
@@ -79,7 +81,7 @@ public sealed class TerminalProfileService
         {
             Directory.CreateDirectory(BasePath);
             File.WriteAllText(ProfilesPath,
-                JsonSerializer.Serialize(_profiles, new JsonSerializerOptions { WriteIndented = true }));
+                JsonSerializer.Serialize(_profiles, s_writeIndentedOptions));
         }
         catch { }
     }
@@ -212,7 +214,7 @@ public sealed class TerminalProfileService
             {
                 Directory.CreateDirectory(BasePath);
                 File.WriteAllText(ThemesPath,
-                    JsonSerializer.Serialize(_themes, new JsonSerializerOptions { WriteIndented = true }));
+                    JsonSerializer.Serialize(_themes, s_writeIndentedOptions));
             }
             catch { }
         }

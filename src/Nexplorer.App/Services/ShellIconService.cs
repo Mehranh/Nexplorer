@@ -138,9 +138,9 @@ public static class ShellIconService
         {
             if (s_imageList32 != IntPtr.Zero) return s_imageList32;
             var iid = IID_IImageList;
-            SHGetImageList(SHIL_LARGE, ref iid, out var himl);
-            s_imageList32 = himl;
-            return himl;
+            if (SHGetImageList(SHIL_LARGE, ref iid, out var himl) == 0)
+                s_imageList32 = himl;
+            return s_imageList32;
         }
     }
 

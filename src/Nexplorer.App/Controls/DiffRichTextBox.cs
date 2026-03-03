@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -277,7 +278,7 @@ public class DiffRichTextBox : RichTextBox
             };
 
             // Line number
-            var lineNum = line.LineNumber?.ToString("D4") ?? "    ";
+            var lineNum = line.LineNumber?.ToString("D4", CultureInfo.InvariantCulture) ?? "    ";
             para.Inlines.Add(new Run(lineNum + "  ") { Foreground = GetLineNumFg() });
 
             switch (line.Kind)

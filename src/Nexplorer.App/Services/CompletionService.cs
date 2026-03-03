@@ -161,7 +161,7 @@ public static class CompletionService
     {
         if (string.IsNullOrEmpty(path)) return path;
         if (path == "~") return HomePath;
-        if (path.StartsWith("~/") || path.StartsWith("~\\"))
+        if (path.StartsWith("~/", StringComparison.Ordinal) || path.StartsWith("~\\", StringComparison.Ordinal))
             return Path.Combine(HomePath, path[2..]);
         return path;
     }
@@ -185,7 +185,7 @@ public static class CompletionService
     /// <summary>
     /// Returns absolute paths (dirs end with \) that start with <paramref name="prefix"/>.
     /// </summary>
-    public static IReadOnlyList<string> GetFileSystemCompletions(
+    public static List<string> GetFileSystemCompletions(
         string prefix, string workingDir, int max = 20)
     {
         try
@@ -218,7 +218,7 @@ public static class CompletionService
             }
 
             if (!Directory.Exists(searchDir))
-                return Array.Empty<string>();
+                return [];
 
             return Directory
                 .EnumerateFileSystemEntries(searchDir,
@@ -235,7 +235,7 @@ public static class CompletionService
         }
         catch
         {
-            return Array.Empty<string>();
+            return [];
         }
     }
 
@@ -287,7 +287,7 @@ public static class CompletionService
     /// <summary>
     /// Returns all file-system completions for the current input token (for display on double-Tab).
     /// </summary>
-    public static IReadOnlyList<string> GetAllTabCompletions(
+    public static List<string> GetAllTabCompletions(
         string input, string workingDir)
     {
         var token = GetCurrentToken(input);
@@ -297,7 +297,7 @@ public static class CompletionService
 
     // ─── Longest common prefix ────────────────────────────────────────────────
 
-    private static string LongestCommonPrefix(IReadOnlyList<string> strings)
+    private static string LongestCommonPrefix(List<string> strings)
     {
         if (strings.Count == 0) return string.Empty;
         if (strings.Count == 1) return strings[0];

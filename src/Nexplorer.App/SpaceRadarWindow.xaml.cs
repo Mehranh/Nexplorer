@@ -9,7 +9,7 @@ using Nexplorer.App.Services;
 
 namespace Nexplorer.App;
 
-public partial class SpaceRadarWindow : Window
+public partial class SpaceRadarWindow : Window, IDisposable
 {
     private readonly string _rootPath;
     private DiskNode? _rootNode;
@@ -84,6 +84,13 @@ public partial class SpaceRadarWindow : Window
         _cts?.Cancel();
         _cts?.Dispose();
         base.OnClosed(e);
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private async Task StartScanAsync()

@@ -196,13 +196,15 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+#pragma warning disable CA1822 // RelayCommand source generator requires instance method
     private void ClearCommandHistory()
     {
-        var store = new CommandHistoryStore();
-        store.Save(Array.Empty<CommandHistoryEntry>());
+        CommandHistoryStore.Save(Array.Empty<CommandHistoryEntry>());
     }
+#pragma warning restore CA1822
 
     [RelayCommand]
+#pragma warning disable CA1822
     private void OpenLogFolder()
     {
         var logDir = Path.Combine(
@@ -211,6 +213,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         Directory.CreateDirectory(logDir);
         Process.Start(new ProcessStartInfo(logDir) { UseShellExecute = true });
     }
+#pragma warning restore CA1822
 
     [ObservableProperty] private string _updateStatus = string.Empty;
     [ObservableProperty] private bool _isCheckingForUpdate;
@@ -222,15 +225,14 @@ public sealed partial class SettingsViewModel : ObservableObject
         UpdateStatus = "Checking…";
         try
         {
-            var svc = new UpdateService();
-            var result = await svc.CheckForUpdateAsync().ConfigureAwait(false);
+            var result = await UpdateService.CheckForUpdateAsync().ConfigureAwait(false);
             if (result.Status is UpdateCheckStatus.UpdateAvailable && result.Update is not null)
             {
                 var update = result.Update;
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     UpdateStatus = $"v{update.Version} available!";
-                    if (NotificationService.Instance.Confirm(
+                    if (NotificationService.Confirm(
                         $"Nexplorer v{update.Version} is available (you have v{UpdateService.CurrentVersion.ToString(3)}).\n\n" +
                         $"{update.ReleaseNotes}\n\nWould you like to download it now?",
                         "Update Available"))

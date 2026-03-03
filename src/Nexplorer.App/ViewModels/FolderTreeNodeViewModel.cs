@@ -80,7 +80,7 @@ public sealed class FolderTreeViewModel
         // ── Favorites section ─────────────────────────────────────────────────
         AddHeader("⭐  Favorites");
         _favoritesInsertIndex = Roots.Count;
-        foreach (var fav in _favService.Load())
+        foreach (var fav in FavoritesService.Load())
         {
             if (Directory.Exists(fav))
             {
@@ -177,7 +177,7 @@ public sealed class FolderTreeViewModel
         }
     }
 
-    private void SaveFavorites() => _favService.Save(GetFavoritePaths());
+    private void SaveFavorites() => FavoritesService.Save(GetFavoritePaths());
 
     // ── Recent Locations ──────────────────────────────────────────────────────
 

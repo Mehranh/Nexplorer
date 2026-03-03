@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -517,7 +518,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
                 ErrorOutput: string.IsNullOrWhiteSpace(errText) ? null : errText);
 
             SharedHistory.Insert(0, entry);
-            _historyStore.Save(SharedHistory);
+            CommandHistoryStore.Save(SharedHistory);
 
             _suppressSuggestionRefresh = true;
             CommandText = string.Empty;
@@ -686,7 +687,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
             Command: cmd,
             ExitCode: exitCode);
         SharedHistory.Insert(0, entry);
-        _historyStore.Save(SharedHistory);
+        CommandHistoryStore.Save(SharedHistory);
         _suppressSuggestionRefresh = true;
         CommandText = string.Empty;
         _suppressSuggestionRefresh = false;
@@ -705,7 +706,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         }
         else
         {
-            sb.AppendLine($"{"Alias",-20} {"Expansion",-40} {"Shell",-12}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"{"Alias",-20} {"Expansion",-40} {"Shell",-12}");
             sb.AppendLine(new string('─', 72));
             OutputSegments.Add(new AnsiSegment($"{"Alias",-20} {"Expansion",-40} {"Shell",-12}\n", "#61D6D6", Bold: true));
             OutputSegments.Add(new AnsiSegment(new string('─', 72) + "\n", "#3F3F46"));
@@ -735,7 +736,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         foreach (var key in keys)
         {
             var val = vars[key]?.ToString() ?? string.Empty;
-            sb.AppendLine($"{key}={val}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"{key}={val}");
             OutputSegments.Add(new AnsiSegment($"{key}", "#61D6D6"));
             OutputSegments.Add(new AnsiSegment("=", "#858585"));
             OutputSegments.Add(new AnsiSegment($"{val}\n", "#CCCCCC"));
@@ -770,7 +771,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         }
         else
         {
-            sb.AppendLine($"{"ID",-5} {"Status",-12} {"Command",-40} {"Started",-20}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"{"ID",-5} {"Status",-12} {"Command",-40} {"Started",-20}");
             sb.AppendLine(new string('─', 77));
             OutputSegments.Add(new AnsiSegment($"{"ID",-5} {"Status",-12} {"Command",-40} {"Started",-20}\n", "#61D6D6", Bold: true));
             OutputSegments.Add(new AnsiSegment(new string('─', 77) + "\n", "#3F3F46"));
@@ -785,7 +786,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
                     _ => "#858585"
                 };
 
-                sb.AppendLine($"{job.Id,-5} {job.Status,-12} {job.Command,-40} {job.StartedAt:HH:mm:ss,-20}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"{job.Id,-5} {job.Status,-12} {job.Command,-40} {job.StartedAt:HH:mm:ss,-20}");
                 OutputSegments.Add(new AnsiSegment($"{job.Id,-5} ", "#F9F1A5"));
                 OutputSegments.Add(new AnsiSegment($"{job.Status,-12} ", statusColor));
                 OutputSegments.Add(new AnsiSegment($"{job.Command,-40} ", "#CCCCCC"));
@@ -810,14 +811,14 @@ public sealed partial class TerminalTabViewModel : ObservableObject
 
         void AddRow(string label, string value, string valueColor)
         {
-            sb.AppendLine($"  {label,-24} {value}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"  {label,-24} {value}");
             OutputSegments.Add(new AnsiSegment($"  {label,-24} ", "#858585"));
             OutputSegments.Add(new AnsiSegment($"{value}\n", valueColor));
         }
 
-        AddRow("Total commands:", m.TotalCommands.ToString(), "#CCCCCC");
-        AddRow("Successful:", m.SuccessCount.ToString(), "#16C60C");
-        AddRow("Failed:", m.FailureCount.ToString(), m.FailureCount > 0 ? "#E74856" : "#CCCCCC");
+        AddRow("Total commands:", m.TotalCommands.ToString(CultureInfo.InvariantCulture), "#CCCCCC");
+        AddRow("Successful:", m.SuccessCount.ToString(CultureInfo.InvariantCulture), "#16C60C");
+        AddRow("Failed:", m.FailureCount.ToString(CultureInfo.InvariantCulture), m.FailureCount > 0 ? "#E74856" : "#CCCCCC");
 
         var rate = m.TotalCommands > 0
             ? $"{(double)m.SuccessCount / m.TotalCommands * 100:F1}%"
@@ -835,7 +836,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         {
             var exitColor = m.LastExitCode == 0 ? "#16C60C" : "#E74856";
             AddRow("Last command:", m.LastCommand, "#CCCCCC");
-            AddRow("Last exit code:", m.LastExitCode?.ToString() ?? "?", exitColor);
+            AddRow("Last exit code:", m.LastExitCode?.ToString(CultureInfo.InvariantCulture) ?? "?", exitColor);
             if (m.LastDuration.HasValue)
                 AddRow("Last duration:", FormatDuration(m.LastDuration.Value), "#CCCCCC");
         }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -33,13 +34,13 @@ public partial class MainWindow : Window
             && (0.299 * bg.Color.R + 0.587 * bg.Color.G + 0.114 * bg.Color.B) > 128;
 
         int darkMode = isLight ? 0 : 1;
-        DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+        _ = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
 
         // Paint the caption background to match the app (BGR format)
         var appBg = (Application.Current.Resources["AppBg"] as SolidColorBrush)?.Color
                     ?? Color.FromRgb(0x1C, 0x1C, 0x1C);
         int captionColor = appBg.R | (appBg.G << 8) | (appBg.B << 16);
-        DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
+        _ = DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
     }
 
     public MainWindow()
@@ -191,7 +192,7 @@ public partial class MainWindow : Window
     //  CLICK / DOUBLE-CLICK TO OPEN
     // ═══════════════════════════════════════════════════════════════════════
 
-    private bool IsSingleClickMode
+    private static bool IsSingleClickMode
         => App.SettingsService.Current.General.ClickMode == Services.Settings.ClickMode.SingleClick;
 
     private void LeftList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -432,7 +433,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void UpdateRubberBandSelection(ItemsControl owner, Rect selectionRect)
+    private static void UpdateRubberBandSelection(ItemsControl owner, Rect selectionRect)
     {
         bool ctrlHeld = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 
@@ -772,7 +773,7 @@ public partial class MainWindow : Window
           ".html",".css",".yaml",".yml",".toml",".ini",".cfg",".bat",".ps1",
           ".sh",".sql",".xaml",".csproj",".sln",".gitignore",".editorconfig" };
 
-    private void UpdatePreview(FileItemViewModel? item, StackPanel panel)
+    private static void UpdatePreview(FileItemViewModel? item, StackPanel panel)
     {
         panel.Children.Clear();
 
@@ -795,7 +796,7 @@ public partial class MainWindow : Window
         // Type / Size / Modified
         panel.Children.Add(MakeInfoLine("Type", item.TypeDisplay));
         panel.Children.Add(MakeInfoLine("Size", item.SizeDisplay));
-        panel.Children.Add(MakeInfoLine("Modified", item.LastWriteTimeLocal.ToString("yyyy-MM-dd HH:mm")));
+        panel.Children.Add(MakeInfoLine("Modified", item.LastWriteTimeLocal.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)));
 
         // If it's a directory, show item count
         if (item.IsDirectory)
@@ -878,7 +879,7 @@ public partial class MainWindow : Window
             var hex = new System.Text.StringBuilder();
             for (int i = 0; i < read; i++)
             {
-                hex.Append(buffer[i].ToString("X2"));
+                hex.Append(buffer[i].ToString("X2", CultureInfo.InvariantCulture));
                 hex.Append(i % 16 == 15 ? '\n' : ' ');
             }
 

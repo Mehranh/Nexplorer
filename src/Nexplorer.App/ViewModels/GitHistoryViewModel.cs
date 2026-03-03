@@ -10,7 +10,7 @@ namespace Nexplorer.App.ViewModels;
 /// <summary>
 /// ViewModel for the Git History bottom panel.
 /// </summary>
-public sealed partial class GitHistoryViewModel : ObservableObject
+public sealed partial class GitHistoryViewModel : ObservableObject, IDisposable
 {
     private CancellationTokenSource? _loadCts;
     private bool _suppressBranchChange;
@@ -93,7 +93,7 @@ public sealed partial class GitHistoryViewModel : ObservableObject
         try
         {
             var entries = await GitHistoryService.GetLogAsync(
-                CurrentDirectory!, CurrentFilePath, 200, ct, SelectedBranch);
+                CurrentDirectory!, CurrentFilePath, 200, SelectedBranch, ct);
             ct.ThrowIfCancellationRequested();
 
             Entries.Clear();
@@ -166,7 +166,7 @@ public sealed partial class GitHistoryViewModel : ObservableObject
 
             // Load log for the current (default) branch
             var entries = await GitHistoryService.GetLogAsync(
-                directory, filePath, 200, ct, SelectedBranch);
+                directory, filePath, 200, SelectedBranch, ct);
             ct.ThrowIfCancellationRequested();
 
             Entries.Clear();
@@ -320,5 +320,11 @@ public sealed partial class GitHistoryViewModel : ObservableObject
         IsBranchDropdownOpen = false;
         BranchFilter = string.Empty;
         SelectedBranch = branch;
+    }
+
+    public void Dispose()
+    {
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
     }
 }

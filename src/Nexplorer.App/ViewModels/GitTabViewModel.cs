@@ -200,7 +200,7 @@ public sealed partial class GitTabViewModel : ObservableObject
     private async Task DiscardFileAsync(GitStatusEntry? entry)
     {
         if (entry is null || CurrentDirectory is null) return;
-        if (!NotificationService.Instance.Confirm(
+        if (!NotificationService.Confirm(
             $"Discard changes to \"{entry.Path}\"?\nThis cannot be undone.",
             "Discard Changes")) return;
 
@@ -228,7 +228,7 @@ public sealed partial class GitTabViewModel : ObservableObject
         if (CurrentDirectory is null || _selectedChangedFiles.Count == 0) return;
 
         var count = _selectedChangedFiles.Count;
-        if (!NotificationService.Instance.Confirm(
+        if (!NotificationService.Confirm(
             $"Discard changes to {count} file(s)?\nThis cannot be undone.",
             "Discard Changes")) return;
 
@@ -247,7 +247,7 @@ public sealed partial class GitTabViewModel : ObservableObject
     {
         if (CurrentDirectory is null || ChangedFiles.Count == 0) return;
 
-        if (!NotificationService.Instance.Confirm(
+        if (!NotificationService.Confirm(
             $"Discard ALL {ChangedFiles.Count} change(s)?\nThis cannot be undone.",
             "Discard All Changes")) return;
 
