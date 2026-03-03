@@ -20,9 +20,12 @@ public sealed partial class TerminalTabViewModel : ObservableObject
     private static int s_nextId;
     private readonly AliasService _aliasService;
     private readonly CommandHistoryStore _historyStore;
+    private readonly string _shellExecutablePath;
+    private readonly string _shellArguments;
     private readonly TabCycleState _tabState = new();
     private int _historyIndex = -1;
     private string _commandSnapshot = string.Empty;
+    private string _inlineSuggestionFull = string.Empty;
     private bool _suppressSuggestionRefresh;
 
     public TerminalTabViewModel(
@@ -31,13 +34,21 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         AliasService aliasService,
         CommandHistoryStore historyStore,
         ObservableCollection<CommandHistoryEntry> sharedHistory,
-        TerminalTheme? theme = null)
+        TerminalTheme? theme = null,
+        string? shellExecutablePath = null,
+        string? shellArguments = null)
     {
         Id = Interlocked.Increment(ref s_nextId);
         _shell = shell;
         _workingDirectory = workingDirectory;
         _aliasService = aliasService;
         _historyStore = historyStore;
+        _shellExecutablePath = string.IsNullOrWhiteSpace(shellExecutablePath)
+            ? GetDefaultExecutable(shell)
+            : shellExecutablePath;
+        _shellArguments = string.IsNullOrWhiteSpace(shellArguments)
+            ? GetDefaultArguments(shell)
+            : shellArguments;
         SharedHistory = sharedHistory;
         Theme = theme;
 
@@ -49,6 +60,8 @@ public sealed partial class TerminalTabViewModel : ObservableObject
     // ─── Identity ─────────────────────────────────────────────────────────────
 
     public int Id { get; }
+    public string ShellExecutablePath => _shellExecutablePath;
+    public string ShellArguments => _shellArguments;
 
     [ObservableProperty] private string _header;
     [ObservableProperty] private bool _isActive;
@@ -173,6 +186,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
             Suggestions.Clear();
             ShowSuggestions = false;
             InlineSuggestion = string.Empty;
+            _inlineSuggestionFull = string.Empty;
             return;
         }
 
@@ -187,10 +201,26 @@ public sealed partial class TerminalTabViewModel : ObservableObject
 
         var ghost = Suggestions.FirstOrDefault(s =>
             s.Kind == SuggestionKind.History
-            && s.Text.StartsWith(input, StringComparison.OrdinalIgnoreCase));
+            && s.Text.StartsWith(input, StringComparison.OrdinalIgnoreCase))
+            ?? Suggestions.FirstOrDefault(s =>
+                s.Text.StartsWith(input, StringComparison.OrdinalIgnoreCase));
 
-        InlineSuggestion = ghost?.Text
-                        ?? (Suggestions.Count > 0 ? Suggestions[0].Text : string.Empty);
+        _inlineSuggestionFull = ghost?.Text ?? string.Empty;
+        InlineSuggestion = BuildGhostText(input, _inlineSuggestionFull);
+    }
+
+    private static string BuildGhostText(string input, string fullSuggestion)
+    {
+        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(fullSuggestion))
+            return string.Empty;
+
+        if (!fullSuggestion.StartsWith(input, StringComparison.OrdinalIgnoreCase))
+            return string.Empty;
+
+        if (fullSuggestion.Length <= input.Length)
+            return string.Empty;
+
+        return new string(' ', input.Length) + fullSuggestion[input.Length..];
     }
 
     // ─── History navigation ───────────────────────────────────────────────────
@@ -230,6 +260,8 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         var next = CompletionService.CycleTabCompletion(CommandText, WorkingDirectory, _tabState);
         CommandText = next;
         ShowSuggestions = false;
+        InlineSuggestion = string.Empty;
+        _inlineSuggestionFull = string.Empty;
         _suppressSuggestionRefresh = false;
     }
 
@@ -238,13 +270,15 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         var text = item?.Text
                 ?? (SelectedSuggestionIndex >= 0 && SelectedSuggestionIndex < Suggestions.Count
                         ? Suggestions[SelectedSuggestionIndex].Text : null)
-                ?? (string.IsNullOrEmpty(InlineSuggestion) ? null : InlineSuggestion);
+            ?? (string.IsNullOrEmpty(_inlineSuggestionFull) ? null : _inlineSuggestionFull)
+            ?? (string.IsNullOrEmpty(InlineSuggestion) ? null : InlineSuggestion.TrimStart());
         if (text is null) return;
 
         _suppressSuggestionRefresh = true;
         CommandText = text;
         ShowSuggestions = false;
         InlineSuggestion = string.Empty;
+        _inlineSuggestionFull = string.Empty;
         _historyIndex = -1;
         _tabState.Reset();
         _suppressSuggestionRefresh = false;
@@ -254,6 +288,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
     {
         ShowSuggestions = false;
         InlineSuggestion = string.Empty;
+        _inlineSuggestionFull = string.Empty;
     }
 
     // ─── Ctrl+R reverse history search ────────────────────────────────────────
@@ -393,7 +428,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         IsRunning = true;
 
         var wrappedCmd = WrapCommandForCwdTracking(Shell, cmd);
-        var startInfo = BuildStartInfo(Shell, wrappedCmd, wd);
+        var startInfo = BuildStartInfo(wrappedCmd, wd);
         int? exitCode = null;
         var sbOut = new StringBuilder();
         var sbErr = new StringBuilder();
@@ -838,7 +873,7 @@ public sealed partial class TerminalTabViewModel : ObservableObject
             try
             {
                 var expandedCmd = _aliasService.ExpandAliases(cmd, Shell);
-                var startInfo = BuildStartInfo(Shell, expandedCmd, wd);
+                var startInfo = BuildStartInfo(expandedCmd, wd);
                 using var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
 
                 job.Process = process;
@@ -963,31 +998,32 @@ public sealed partial class TerminalTabViewModel : ObservableObject
         return string.IsNullOrWhiteSpace(cwdRaw) ? null : cwdRaw;
     }
 
-    private static ProcessStartInfo BuildStartInfo(ShellKind shell, string command, string wd) =>
-        shell == ShellKind.Cmd
-            ? new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/c " + command,
-                WorkingDirectory = wd,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding = Encoding.UTF8,
-            }
-            : new ProcessStartInfo
-            {
-                FileName = "powershell.exe",
-                Arguments = "-NoLogo -NoProfile -NonInteractive -Command " + command,
-                WorkingDirectory = wd,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding = Encoding.UTF8,
-                Environment = { ["TERM"] = "xterm-256color" },
-            };
+    private ProcessStartInfo BuildStartInfo(string command, string wd)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = _shellExecutablePath,
+            Arguments = string.IsNullOrWhiteSpace(_shellArguments)
+                ? command
+                : _shellArguments + " " + command,
+            WorkingDirectory = wd,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+
+        if (Shell == ShellKind.PowerShell)
+            startInfo.Environment["TERM"] = "xterm-256color";
+
+        return startInfo;
+    }
+
+    private static string GetDefaultExecutable(ShellKind shell)
+        => shell == ShellKind.Cmd ? "cmd.exe" : "powershell.exe";
+
+    private static string GetDefaultArguments(ShellKind shell)
+        => shell == ShellKind.Cmd ? "/c" : "-NoLogo -Command";
 }

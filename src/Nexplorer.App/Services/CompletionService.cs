@@ -72,7 +72,8 @@ public static class CompletionService
         }
 
         // 3. File-system completions on the last token (with ~ expansion)
-        var lastWord = GetLastWord(input);
+        var token = GetCurrentToken(input);
+        var lastWord = token.Lookup;
         var hasCommand = input.TrimEnd().Length > 0;
         if (!string.IsNullOrEmpty(lastWord) || (hasCommand && input.Length > input.TrimEnd().Length))
         {
@@ -80,7 +81,7 @@ public static class CompletionService
             foreach (var fsPath in GetFileSystemCompletions(expandedWord, workingDir))
             {
                 if (results.Count >= maxItems) break;
-                var full = ReplaceLastWord(input, lastWord, fsPath);
+            var full = ReplaceCurrentToken(input, token, fsPath);
                 if (!seen.Add(full)) continue;
                 var isDir = fsPath.EndsWith(Path.DirectorySeparatorChar)
                          || fsPath.EndsWith(Path.AltDirectorySeparatorChar);
@@ -242,7 +243,8 @@ public static class CompletionService
         string          workingDir,
         TabCycleState   state)
     {
-        var lastWord = GetLastWord(input);
+        var token = GetCurrentToken(input);
+        var lastWord = token.Lookup;
         var expandedWord = ExpandTilde(lastWord);
 
         // Reset if the input changed (user typed)
@@ -264,13 +266,13 @@ public static class CompletionService
                 (lcp.Length > lastWord.Length && expandedWord != lastWord))
             {
                 state.CommonPrefixApplied = true;
-                return ReplaceLastWord(input, lastWord, lcp);
+                return ReplaceCurrentToken(input, token, lcp);
             }
         }
 
         state.CommonPrefixApplied = true;
         state.Index = (state.Index + 1) % state.Completions.Count;
-        return ReplaceLastWord(input, lastWord, state.Completions[state.Index]);
+        return ReplaceCurrentToken(input, token, state.Completions[state.Index]);
     }
 
     /// <summary>
@@ -279,8 +281,8 @@ public static class CompletionService
     public static IReadOnlyList<string> GetAllTabCompletions(
         string input, string workingDir)
     {
-        var lastWord = GetLastWord(input);
-        var expanded = ExpandTilde(lastWord);
+        var token = GetCurrentToken(input);
+        var expanded = ExpandTilde(token.Lookup);
         return GetFileSystemCompletions(expanded, workingDir, max: 50);
     }
 
@@ -314,20 +316,71 @@ public static class CompletionService
 
     public static string GetLastWord(string input)
     {
-        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-        // If input ends with whitespace, user is starting a new argument
-        if (char.IsWhiteSpace(input[^1]))
-            return string.Empty;
-        var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length > 0 ? parts[^1] : string.Empty;
+        return GetCurrentToken(input).Lookup;
     }
 
-    private static string ReplaceLastWord(string input, string lastWord, string replacement)
+    private static string ReplaceCurrentToken(string input, InputToken token, string replacement)
     {
-        if (string.IsNullOrEmpty(lastWord)) return input + replacement;
-        var idx = input.LastIndexOf(lastWord, StringComparison.Ordinal);
-        return idx < 0 ? input : input[..idx] + replacement;
+        var prefix = token.HasLeadingQuote ? token.QuoteChar.ToString() : string.Empty;
+        var replacementText = prefix + replacement;
+
+        if (token.Length == 0)
+            return input + replacementText;
+
+        return input[..token.Start] + replacementText;
     }
+
+    private static InputToken GetCurrentToken(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return new InputToken(string.Empty, string.Empty, input.Length, 0, false, '\0');
+
+        if (char.IsWhiteSpace(input[^1]))
+            return new InputToken(string.Empty, string.Empty, input.Length, 0, false, '\0');
+
+        int tokenStart = -1;
+        bool inSingle = false;
+        bool inDouble = false;
+
+        for (int i = 0; i < input.Length; i++)
+        {
+            var c = input[i];
+            if (c == '"' && !inSingle)
+            {
+                inDouble = !inDouble;
+            }
+            else if (c == '\'' && !inDouble)
+            {
+                inSingle = !inSingle;
+            }
+
+            if (char.IsWhiteSpace(c) && !inSingle && !inDouble)
+            {
+                tokenStart = -1;
+                continue;
+            }
+
+            if (tokenStart < 0)
+                tokenStart = i;
+        }
+
+        if (tokenStart < 0)
+            return new InputToken(string.Empty, string.Empty, input.Length, 0, false, '\0');
+
+        var raw = input[tokenStart..];
+        var hasLeadingQuote = raw.Length > 0 && (raw[0] == '"' || raw[0] == '\'');
+        var quoteChar = hasLeadingQuote ? raw[0] : '\0';
+        var lookup = hasLeadingQuote ? raw[1..] : raw;
+        return new InputToken(raw, lookup, tokenStart, raw.Length, hasLeadingQuote, quoteChar);
+    }
+
+    private readonly record struct InputToken(
+        string Raw,
+        string Lookup,
+        int Start,
+        int Length,
+        bool HasLeadingQuote,
+        char QuoteChar);
 }
 
 // ─── Tab-cycle state (mutable, owned by ViewModel) ──────────────────────────

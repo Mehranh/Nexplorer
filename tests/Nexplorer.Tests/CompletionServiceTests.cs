@@ -20,11 +20,13 @@ public class CompletionServiceTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_testDir, "Desktop"));
         Directory.CreateDirectory(Path.Combine(_testDir, "src"));
         Directory.CreateDirectory(Path.Combine(_testDir, "src", "components"));
+        Directory.CreateDirectory(Path.Combine(_testDir, "My Folder"));
         File.WriteAllText(Path.Combine(_testDir, "readme.md"), "test");
         File.WriteAllText(Path.Combine(_testDir, "readme.txt"), "test");
         File.WriteAllText(Path.Combine(_testDir, "run.ps1"), "test");
         File.WriteAllText(Path.Combine(_testDir, "src", "main.cs"), "test");
         File.WriteAllText(Path.Combine(_testDir, "src", "app.cs"), "test");
+        File.WriteAllText(Path.Combine(_testDir, "My Folder", "spaced file.txt"), "test");
     }
 
     public void Dispose()
@@ -48,6 +50,8 @@ public class CompletionServiceTests : IDisposable
     [InlineData("", "")]
     [InlineData("  ", "")]
     [InlineData("cd src\\components", "src\\components")]
+    [InlineData("cd \"My Fo", "My Fo")]
+    [InlineData("cd 'My Fo", "My Fo")]
     public void GetLastWord_ReturnsCorrectToken(string input, string expected)
     {
         Assert.Equal(expected, CompletionService.GetLastWord(input));
@@ -284,6 +288,17 @@ public class CompletionServiceTests : IDisposable
         Assert.True(fsItems.Count >= 1, "Expected file-system suggestions with trailing space");
     }
 
+    [Fact]
+    public void GetSuggestions_QuotedPathPrefix_UsesCurrentWorkingDirectory()
+    {
+        var history = Array.Empty<CommandHistoryEntry>();
+        var results = CompletionService.GetSuggestions("cd \"My Fo", _testDir, history);
+        var fsItems = results.Where(r => r.Kind == SuggestionKind.FileSystem).ToList();
+
+        Assert.Contains(fsItems, item =>
+            item.Text.StartsWith("cd \"My Folder", StringComparison.OrdinalIgnoreCase));
+    }
+
     // ═════════════════════════════════════════════════════════════════════════
     //  GetSuggestions — Bang Commands
     // ═════════════════════════════════════════════════════════════════════════
@@ -426,6 +441,14 @@ public class CompletionServiceTests : IDisposable
         // Typing more should reset
         CompletionService.CycleTabCompletion("ls run", _testDir, state);
         Assert.Equal("run", state.Prefix);
+    }
+
+    [Fact]
+    public void CycleTabCompletion_QuotedPrefix_PreservesQuoteAndCompletesPath()
+    {
+        var state = new TabCycleState();
+        var result = CompletionService.CycleTabCompletion("cd \"My Fo", _testDir, state);
+        Assert.StartsWith("cd \"My Folder", result, StringComparison.OrdinalIgnoreCase);
     }
 
     // ═════════════════════════════════════════════════════════════════════════

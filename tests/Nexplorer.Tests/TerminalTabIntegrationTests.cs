@@ -72,6 +72,7 @@ public class TerminalTabIntegrationTests : IDisposable
         var tab = CreateTab();
         tab.CommandText = "test";
         Assert.True(tab.ShowSuggestions);
+        var hadInlineSuggestion = !string.IsNullOrEmpty(tab.InlineSuggestion);
 
         tab.CommandText = "";
         Assert.False(tab.ShowSuggestions);
@@ -89,18 +90,23 @@ public class TerminalTabIntegrationTests : IDisposable
         var tab = CreateTab();
         tab.CommandText = "git";
 
-        Assert.Equal("git status", tab.InlineSuggestion);
+        Assert.EndsWith(" status", tab.InlineSuggestion, StringComparison.Ordinal);
+        Assert.StartsWith("   ", tab.InlineSuggestion, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void InlineSuggestion_FallsBackToFirstSuggestion()
+    public void InlineSuggestion_ShowsOnlyForPrefixMatches()
     {
         var tab = CreateTab();
         tab.CommandText = "ls re";
 
-        // No history match, so ghost should be first suggestion (FS)
+        // Prefix file-system match exists, so ghost suffix should be visible.
         Assert.False(string.IsNullOrEmpty(tab.InlineSuggestion));
-        Assert.Contains("readme", tab.InlineSuggestion, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adme", tab.InlineSuggestion, StringComparison.OrdinalIgnoreCase);
+
+        // No suggestion starts with "build" in this test setup, so no ghost text should be shown.
+        tab.CommandText = "build";
+        Assert.Equal(string.Empty, tab.InlineSuggestion);
     }
 
     // ─── Tab completion ───────────────────────────────────────────────────
@@ -317,6 +323,7 @@ public class TerminalTabIntegrationTests : IDisposable
         var tab = CreateTab();
         tab.CommandText = "test";
         Assert.True(tab.ShowSuggestions);
+        var hadInlineSuggestion = !string.IsNullOrEmpty(tab.InlineSuggestion);
 
         var changedProps = new List<string>();
         tab.PropertyChanged += (_, e) => { if (e.PropertyName is not null) changedProps.Add(e.PropertyName); };
@@ -324,7 +331,8 @@ public class TerminalTabIntegrationTests : IDisposable
         tab.DismissSuggestions();
 
         Assert.Contains(nameof(TerminalTabViewModel.ShowSuggestions), changedProps);
-        Assert.Contains(nameof(TerminalTabViewModel.InlineSuggestion), changedProps);
+        if (hadInlineSuggestion)
+            Assert.Contains(nameof(TerminalTabViewModel.InlineSuggestion), changedProps);
     }
 
     // ─── Frequency weighting ─────────────────────────────────────────────
