@@ -6,9 +6,15 @@ on:
       - 'v*'
   workflow_dispatch:
 
+# Least-privilege: no permissions by default
+permissions: {}
+
 jobs:
   build:
     runs-on: windows-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -19,11 +25,17 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore
+      - name: Restore & audit NuGet packages
         run: dotnet restore src/Nexplorer.App/Nexplorer.App.csproj
 
       - name: Run tests
         run: dotnet test tests/Nexplorer.Tests/Nexplorer.Tests.csproj --verbosity normal
+
+      - name: Build with security analyzers
+        run: >
+          dotnet build src/Nexplorer.App/Nexplorer.App.csproj
+          -c Release -warnaserror
+          -p:TreatWarningsAsErrors=true
 
       - name: Publish app
         run: >
@@ -40,11 +52,19 @@ jobs:
         working-directory: installer
         run: wix build Package.wxs -ext WixToolset.UI.wixext -o ../publish/Nexplorer-Setup.msi
 
+      - name: Generate MSI checksum
+        run: |
+          $hash = (Get-FileHash publish/Nexplorer-Setup.msi -Algorithm SHA256).Hash
+          "$hash  Nexplorer-Setup.msi" | Out-File publish/Nexplorer-Setup.msi.sha256 -Encoding utf8
+          Write-Output "SHA256: $hash"
+
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v4
         with:
           name: Nexplorer-Setup
-          path: publish/Nexplorer-Setup.msi
+          path: |
+            publish/Nexplorer-Setup.msi
+            publish/Nexplorer-Setup.msi.sha256
 
   release:
     needs: build
@@ -63,5 +83,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Nexplorer-Setup.msi
+          files: |
+            Nexplorer-Setup.msi
+            Nexplorer-Setup.msi.sha256
           generate_release_notes: true

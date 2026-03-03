@@ -1,0 +1,97 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  security-scan:
+    name: Security Analysis
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+      security-events: write   # for CodeQL / SARIF uploads
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # NuGet audit — fails the build if any known-vulnerable package is referenced
+      - name: Restore with NuGet audit
+        run: >
+          dotnet restore Nexplorer.sln
+          -p:NuGetAudit=true
+          -p:NuGetAuditLevel=low
+          -p:NuGetAuditMode=all
+          -warnaserror
+
+      # Build with Roslyn security analyzers at maximum level
+      - name: Build with security analyzers
+        run: >
+          dotnet build Nexplorer.sln -c Release --no-restore
+          -p:EnableNETAnalyzers=true
+          -p:AnalysisLevel=latest-recommended
+          -p:EnforceCodeStyleInBuild=true
+
+      # Run tests to catch regressions
+      - name: Run tests
+        run: dotnet test tests/Nexplorer.Tests/Nexplorer.Tests.csproj --no-build -c Release --verbosity normal
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Flags new dependencies with known CVEs introduced by a PR
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: low
+
+  codeql:
+    name: CodeQL Analysis
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build for CodeQL
+        run: dotnet build Nexplorer.sln -c Release
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
