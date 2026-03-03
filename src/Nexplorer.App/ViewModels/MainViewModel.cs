@@ -263,6 +263,8 @@ public sealed partial class MainViewModel : ObservableObject
         ActiveBottomTab = tab;
         if (tab == "Git")
             _ = GitTab.LoadAsync(ActivePane.CurrentPath);
+        else if (tab == "GitHistory" && GitHistory.Entries.Count == 0)
+            _ = GitHistory.ShowHistoryAsync(ActivePane.CurrentPath);
     }
 
     [RelayCommand]
