@@ -166,14 +166,16 @@ public sealed class SuggestionKindColorConverter : IValueConverter
     private static readonly Brush HistoryBrushDark = new SolidColorBrush(Color.FromRgb(0x9B, 0xDB, 0xFF));
     private static readonly Brush FsBrushDark      = new SolidColorBrush(Color.FromRgb(0xDC, 0xB8, 0x6C));
     private static readonly Brush BangBrushDark    = new SolidColorBrush(Color.FromRgb(0xC5, 0x86, 0xC0));
+    private static readonly Brush CliBrushDark     = new SolidColorBrush(Color.FromRgb(0x6A, 0xC4, 0x7E));
     private static readonly Brush HistoryBrushLight = new SolidColorBrush(Color.FromRgb(0x15, 0x65, 0xC0));
     private static readonly Brush FsBrushLight      = new SolidColorBrush(Color.FromRgb(0xC4, 0x9A, 0x00));
     private static readonly Brush BangBrushLight    = new SolidColorBrush(Color.FromRgb(0x7B, 0x1F, 0xA2));
+    private static readonly Brush CliBrushLight     = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
 
     static SuggestionKindColorConverter()
     {
-        HistoryBrushDark.Freeze(); FsBrushDark.Freeze(); BangBrushDark.Freeze();
-        HistoryBrushLight.Freeze(); FsBrushLight.Freeze(); BangBrushLight.Freeze();
+        HistoryBrushDark.Freeze(); FsBrushDark.Freeze(); BangBrushDark.Freeze(); CliBrushDark.Freeze();
+        HistoryBrushLight.Freeze(); FsBrushLight.Freeze(); BangBrushLight.Freeze(); CliBrushLight.Freeze();
     }
 
     public object Convert(object value, Type _, object __, CultureInfo ___)
@@ -181,8 +183,9 @@ public sealed class SuggestionKindColorConverter : IValueConverter
         var isLight = FileIconColorConverter.IsLightTheme();
         return value switch
         {
-            SuggestionKind.FileSystem => isLight ? FsBrushLight : FsBrushDark,
-            SuggestionKind.BangCommand => isLight ? BangBrushLight : BangBrushDark,
+            SuggestionKind.FileSystem   => isLight ? FsBrushLight   : FsBrushDark,
+            SuggestionKind.BangCommand  => isLight ? BangBrushLight : BangBrushDark,
+            SuggestionKind.CliTool      => isLight ? CliBrushLight  : CliBrushDark,
             _ => isLight ? HistoryBrushLight : HistoryBrushDark
         };
     }

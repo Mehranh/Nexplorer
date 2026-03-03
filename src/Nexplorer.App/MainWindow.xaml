@@ -2276,6 +2276,9 @@
                                                                     <DataTrigger Binding="{Binding Kind}" Value="BangCommand">
                                                                         <Setter Property="Kind" Value="Flash"/>
                                                                     </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Kind}" Value="CliTool">
+                                                                        <Setter Property="Kind" Value="Console"/>
+                                                                    </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </iconPacks:PackIconMaterial.Style>

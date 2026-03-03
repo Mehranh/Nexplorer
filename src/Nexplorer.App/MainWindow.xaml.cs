@@ -50,7 +50,12 @@ public partial class MainWindow : Window
         // Apply title bar theme once the window handle is available
         SourceInitialized += (_, _) => ApplyTitleBarTheme();
 
-        // Dismiss suggestion popup on minimize; reposition on resize
+        // Dismiss suggestion popup on minimize or window deactivation; reposition on resize
+        Deactivated += (_, _) =>
+        {
+            if (Vm.ShowSuggestions)
+                Vm.DismissSuggestions();
+        };
         StateChanged += (_, _) =>
         {
             if (WindowState == WindowState.Minimized && Vm.ShowSuggestions)

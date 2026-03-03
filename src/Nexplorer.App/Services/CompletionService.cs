@@ -71,7 +71,16 @@ public static class CompletionService
             results.Add(new SuggestionItem(g.Key, SuggestionKind.History, detail));
         }
 
-        // 3. File-system completions on the last token (with ~ expansion)
+        // 3. CLI tool-aware subcommand / flag suggestions
+        var cliSuggestions = CliSuggestionService.GetSuggestions(input, maxItems - results.Count);
+        foreach (var cli in cliSuggestions)
+        {
+            if (results.Count >= maxItems) break;
+            if (!seen.Add(cli.Text)) continue;
+            results.Add(cli);
+        }
+
+        // 4. File-system completions on the last token (with ~ expansion)
         var token = GetCurrentToken(input);
         var lastWord = token.Lookup;
         var hasCommand = input.TrimEnd().Length > 0;

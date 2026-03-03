@@ -8,31 +8,5 @@ Every line of code, UI layout, and architectural decision in this project was ge
 
 - **Dual-Pane View** — Side-by-side file browsing with tabs
 - **Integrated Terminal** — Built-in terminal with profiles, themes, and command history
-- **Quick Edit** — Edit files directly with syntax highlighting (AvalonEdit)
-- **Batch Rename** — Rename multiple files with pattern matching and preview
-- **Built-in Diff** — Compare files side by side with synchronized scrolling
-- **Auto Updates** — Get notified of new versions on startup
-
-## Requirements
-
-- Windows 10/11 (64-bit)
-
-## Download
-
-[**Download Nexplorer v1.0.13**](https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi) (~61 MB, no runtime required)
-
-## Build from Source
-
-```bash
-dotnet build src/Nexplorer.App/Nexplorer.App.csproj
-```
-
-## Run Tests
-
-```bash
-dotnet test tests/Nexplorer.Tests/Nexplorer.Tests.csproj
-```
-
-## License
-
+- **Quick Edit** — Edit files directly with syntax highlighting (AvalonEdit)2
 © 2026 Nexplorer

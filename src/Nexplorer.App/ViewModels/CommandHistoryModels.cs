@@ -70,6 +70,7 @@ public enum SuggestionKind
     History,      // from command history
     FileSystem,   // file/directory path completion
     BangCommand,  // !!, !n, !prefix re-run shortcut
+    CliTool,      // intelligent CLI subcommand / flag suggestion
 }
 
 public sealed record SuggestionItem(
