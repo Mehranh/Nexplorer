@@ -89,6 +89,9 @@ public sealed partial class MainViewModel : ObservableObject
 
         // Track path changes on both panes for recent locations
         ResubscribeRecentTracking();
+
+        // Initialize the command palette with all available commands
+        InitializeCommandPalette();
     }
 
     // ─── Click mode ───────────────────────────────────────────────────────────
@@ -293,6 +296,88 @@ public sealed partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenSearch() => SearchRequested?.Invoke(this, EventArgs.Empty);
+
+    // ─── Command Palette ──────────────────────────────────────────────────────
+
+    public CommandPaletteViewModel CommandPalette { get; } = new();
+
+    /// <summary>Raised when the view should open a specific dialog (Search, Settings, etc.).</summary>
+    public event Action<string>? DialogRequested;
+
+    public void InitializeCommandPalette()
+    {
+        var commands = new List<PaletteCommand>
+        {
+            // ── Navigation ──
+            new("nav.back",         "Go Back",                  "Navigation", "Alt+←",       "ArrowLeft",        () => ActivePane.NavigateBackCommand.Execute(null)),
+            new("nav.forward",      "Go Forward",               "Navigation", "Alt+→",       "ArrowRight",       () => ActivePane.NavigateForwardCommand.Execute(null)),
+            new("nav.up",           "Go Up to Parent",          "Navigation", "Backspace",   "ArrowUp",          () => ActivePane.NavigateUpCommand.Execute(null)),
+            new("nav.home",         "Go to Home Directory",     "Navigation", null,          "Home",             () => _ = ActivePane.GoToAsync(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), pushHistory: true)),
+            new("nav.desktop",      "Go to Desktop",            "Navigation", null,          "DesktopWindows",   () => _ = ActivePane.GoToAsync(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), pushHistory: true)),
+            new("nav.documents",    "Go to Documents",          "Navigation", null,          "FileDocument",     () => _ = ActivePane.GoToAsync(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), pushHistory: true)),
+            new("nav.downloads",    "Go to Downloads",          "Navigation", null,          "Download",         () => _ = ActivePane.GoToAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"), pushHistory: true)),
+            new("nav.otherPane",    "Go to Other Pane's Folder","Navigation", null,          "FolderSwap",       () => _ = GoToOtherPaneFolderAsync()),
+            new("nav.refresh",      "Refresh",                  "Navigation", "Ctrl+R",      "Refresh",          () => ActivePane.NavigateCommand.Execute(null)),
+
+            // ── Pane / Tab ──
+            new("pane.left",        "Focus Left Pane",          "Panes",  "Ctrl+2",    "DockLeft",          () => ActivateLeftPane()),
+            new("pane.right",       "Focus Right Pane",         "Panes",  "Ctrl+3",    "DockRight",         () => ActivateRightPane()),
+            new("pane.newTab",      "New Tab",                  "Panes",  "Ctrl+T",    "Plus",              () => (_activeIsLeft ? LeftTabs : RightTabs).AddTabCommand.Execute(null)),
+            new("pane.closeTab",    "Close Tab",                "Panes",  "Ctrl+W",    "Close",             () => { var tabs = _activeIsLeft ? LeftTabs : RightTabs; if (tabs.ActiveTab is not null) tabs.CloseTabCommand.Execute(tabs.ActiveTab); }),
+            new("pane.duplicateTab","Duplicate Tab",            "Panes",  "Ctrl+D",    "ContentDuplicate",  () => (_activeIsLeft ? LeftTabs : RightTabs).DuplicateTabCommand.Execute(null)),
+
+            // ── File Operations ──
+            new("file.newFolder",   "New Folder",               "File",   "F7",        "FolderPlus",        () => _ = ActivePane.NewFolderCommand.ExecuteAsync(null)),
+            new("file.newFile",     "New File",                 "File",   "Ctrl+N",    "FilePlus",          () => _ = ActivePane.NewFileCommand.ExecuteAsync(null)),
+            new("file.rename",      "Rename",                   "File",   "F2",        "RenameBox",         () => ActivePane.BeginRenameCommand.Execute(null)),
+            new("file.delete",      "Delete",                   "File",   "Del",       "Delete",            () => ActivePane.DeleteSelectedCommand.Execute(null)),
+            new("file.cut",         "Cut",                      "File",   "Ctrl+X",    "ContentCut",        () => ActivePane.CutSelectedCommand.Execute(null)),
+            new("file.copy",        "Copy",                     "File",   "Ctrl+C",    "ContentCopy",       () => ActivePane.CopySelectedCommand.Execute(null)),
+            new("file.paste",       "Paste",                    "File",   "Ctrl+V",    "ContentPaste",      () => _ = ActivePane.PasteCommand.ExecuteAsync(null)),
+            new("file.copyPath",    "Copy as Path",             "File",   "Ctrl+Shift+C", "ContentCopy",    () => ActivePane.CopyPathCommand.Execute(null)),
+            new("file.copyToOther", "Copy to Other Pane",       "File",   "F5",        "ContentCopy",       () => _ = CopyToOtherPaneAsync()),
+            new("file.moveToOther", "Move to Other Pane",       "File",   "F6",        "FileMove",          () => _ = MoveToOtherPaneAsync()),
+            new("file.properties",  "Properties",               "File",   "Alt+Enter", "InformationOutline",() => ActivePane.OpenPropertiesCommand.Execute(null)),
+            new("file.selectAll",   "Select All",               "File",   "Ctrl+A",    "SelectAll",         () => ActivePane.SelectAllCommand.Execute(null)),
+            new("file.invertSel",   "Invert Selection",         "File",   null,        "SelectInverse",     () => ActivePane.InvertSelectionCommand.Execute(null)),
+
+            // ── View ──
+            new("view.filter",      "Toggle Filter Bar",        "View",   "Ctrl+F",    "Filter",            () => ActivePane.ToggleFilterCommand.Execute(null)),
+            new("view.preview",     "Toggle Preview Pane",      "View",   "F8",        "EyeOutline",        () => ActivePane.TogglePreviewCommand.Execute(null)),
+            new("view.details",     "View: Details",            "View",   null,        "ViewList",          () => ActivePane.SetViewModeCommand.Execute("Details")),
+            new("view.largeIcons",  "View: Large Icons",        "View",   null,        "ViewGrid",          () => ActivePane.SetViewModeCommand.Execute("LargeIcons")),
+            new("view.smallIcons",  "View: Small Icons",        "View",   null,        "ViewModule",        () => ActivePane.SetViewModeCommand.Execute("SmallIcons")),
+            new("view.list",        "View: List",               "View",   null,        "ViewSequential",    () => ActivePane.SetViewModeCommand.Execute("List")),
+            new("view.tiles",       "View: Tiles",              "View",   null,        "ViewDashboard",     () => ActivePane.SetViewModeCommand.Execute("Tiles")),
+
+            // ── Tools ──
+            new("tool.search",      "Search Files",             "Tools",  "F9",        "Magnify",           () => DialogRequested?.Invoke("Search")),
+            new("tool.batchRename", "Batch Rename",             "Tools",  "Ctrl+M",    "FormTextbox",       () => BatchRename()),
+            new("tool.quickEdit",   "Quick Edit",               "Tools",  "F3",        "FileEditOutline",   () => DialogRequested?.Invoke("QuickEdit")),
+            new("tool.diff",        "Diff Files (L ↔ R)",       "Tools",  "Ctrl+D",    "FileCompare",       () => DialogRequested?.Invoke("Diff")),
+            new("tool.spaceRadar",  "Space Radar (Disk Usage)", "Tools",  "Ctrl+Shift+R", "ChartTree",      () => DialogRequested?.Invoke("SpaceRadar")),
+            new("tool.compare",     "Compare Directories",      "Tools",  null,        "FolderSwap",        () => CompareDirectories()),
+            new("tool.settings",    "Open Settings",            "Tools",  "Ctrl+,",    "Cog",               () => DialogRequested?.Invoke("Settings")),
+
+            // ── Git ──
+            new("git.history",      "Git: Show History",        "Git",    "Ctrl+G",    "SourceBranch",      () => _ = ShowGitHistoryAsync()),
+            new("git.sourceControl","Git: Source Control",       "Git",    null,        "SourcePull",        () => _ = ShowGitTabAsync()),
+            new("git.commit",       "Git: Commit",              "Git",    null,        "SourceCommit",      () => { _ = ShowGitTabAsync(); }),
+            new("git.push",         "Git: Push",                "Git",    null,        "SourceBranchSync",  () => _ = GitTab.PushCommand.ExecuteAsync(null)),
+            new("git.pull",         "Git: Pull",                "Git",    null,        "CloudDownload",     () => _ = GitTab.PullCommand.ExecuteAsync(null)),
+
+            // ── Terminal ──
+            new("term.focus",       "Focus Terminal",           "Terminal","Ctrl+L",    "Console",           () => SwitchBottomTab("Terminal")),
+            new("term.newTab",      "Terminal: New Tab",        "Terminal",null,        "Plus",              () => TerminalPanel.AddTabCommand.Execute(null)),
+            new("term.clear",       "Terminal: Clear Output",   "Terminal",null,        "Eraser",            () => { if (TerminalPanel.ActiveTab is { } tab) { tab.OutputSegments.Clear(); tab.OutputText = string.Empty; } }),
+
+            // ── Favorites ──
+            new("fav.add",          "Add to Favorites",         "Favorites",null,      "Star",              () => AddToFavorites()),
+            new("fav.remove",       "Remove from Favorites",    "Favorites",null,      "StarOff",           () => RemoveFromFavorites()),
+        };
+
+        CommandPalette.RegisterCommands(commands);
+    }
 
     // ─── Terminal panel ────────────────────────────────────────────────────────
 

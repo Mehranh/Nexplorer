@@ -36,6 +36,21 @@ public sealed class InverseBoolToVisibilityConverter : IValueConverter
         => (Visibility)v != Visibility.Visible;
 }
 
+// ── null/empty → Visibility ─────────────────────────────────────────────────
+
+/// <summary>non-null → Visible, null or empty string → Collapsed.</summary>
+[ValueConversion(typeof(object), typeof(Visibility))]
+public sealed class NullToVisibilityConverter : IValueConverter
+{
+    public static readonly NullToVisibilityConverter Instance = new();
+
+    public object Convert(object? value, Type _, object? __, CultureInfo ___)
+        => value is null or "" ? Visibility.Collapsed : Visibility.Visible;
+
+    public object ConvertBack(object v, Type t, object? p, CultureInfo c)
+        => throw new NotSupportedException();
+}
+
 // ── Tab active state → brush ────────────────────────────────────────────────
 
 /// <summary>bool IsActive → tab highlight brush.</summary>

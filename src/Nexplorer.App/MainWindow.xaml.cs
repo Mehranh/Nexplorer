@@ -79,6 +79,9 @@ public partial class MainWindow : Window
         // Re-apply title bar when theme changes
         App.SettingsService.SettingsChanged += _ => Dispatcher.Invoke(ApplyTitleBarTheme);
 
+        // Wire up Command Palette dialog requests
+        Vm.DialogRequested += dialog => Dispatcher.Invoke(() => HandleDialogRequest(dialog));
+
         // Subscribe to terminal panel output changes for auto-scroll
         if (Vm.TerminalPanel.ActiveTab is not null)
         {
@@ -1231,6 +1234,29 @@ public partial class MainWindow : Window
     {
         base.OnPreviewKeyDown(e);
 
+        // ── Command Palette (Ctrl+Shift+P) ──
+        if (e.Key == Key.P && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+        {
+            if (Vm.CommandPalette.IsOpen)
+                Vm.CommandPalette.Close();
+            else
+                OpenCommandPalette();
+            e.Handled = true;
+            return;
+        }
+
+        // Close command palette on Escape
+        if (e.Key == Key.Escape && Vm.CommandPalette.IsOpen)
+        {
+            Vm.CommandPalette.Close();
+            e.Handled = true;
+            return;
+        }
+
+        // Swallow all keys when palette is open (they go to the search box)
+        if (Vm.CommandPalette.IsOpen)
+            return;
+
         // Tab switches between left and right file panes (standard dual-pane behavior)
         if (e.Key == Key.Tab && !IsTextInputFocused())
         {
@@ -1515,5 +1541,78 @@ public partial class MainWindow : Window
     {
         if (sender is FrameworkElement fe && fe.Tag is NotificationItem item)
             NotificationService.Instance.Dismiss(item);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  COMMAND PALETTE
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private void OpenCommandPalette()
+    {
+        Vm.CommandPalette.Open();
+        Dispatcher.InvokeAsync(() =>
+        {
+            PaletteSearchBox.Focus();
+            PaletteSearchBox.SelectAll();
+        }, System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    private void PaletteSearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Down:
+                Vm.CommandPalette.MoveDownCommand.Execute(null);
+                PaletteList.ScrollIntoView(PaletteList.SelectedItem);
+                e.Handled = true;
+                break;
+            case Key.Up:
+                Vm.CommandPalette.MoveUpCommand.Execute(null);
+                PaletteList.ScrollIntoView(PaletteList.SelectedItem);
+                e.Handled = true;
+                break;
+            case Key.Return:
+                Vm.CommandPalette.ExecuteSelectedCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                Vm.CommandPalette.Close();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void CommandPalette_BackdropClick(object sender, MouseButtonEventArgs e)
+    {
+        // Close when clicking the dark backdrop (not the card itself)
+        Vm.CommandPalette.Close();
+    }
+
+    private void CommandPalette_CardMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // Prevent the backdrop click from closing when clicking inside the card
+        e.Handled = true;
+    }
+
+    private void PaletteList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        Vm.CommandPalette.ExecuteSelectedCommand.Execute(null);
+    }
+
+    private void PaletteList_MouseClick(object sender, MouseButtonEventArgs e)
+    {
+        // No-op: selection only. Execute happens on double-click or Enter.
+    }
+
+    private void HandleDialogRequest(string dialog)
+    {
+        switch (dialog)
+        {
+            case "Search":     OpenSearch(); break;
+            case "Settings":   OpenSettings(); break;
+            case "QuickEdit":  OpenQuickEdit(); break;
+            case "Diff":       OpenFileDiff(); break;
+            case "SpaceRadar": OpenSpaceRadar(); break;
+        }
     }
 }

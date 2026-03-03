@@ -2453,6 +2453,137 @@
         </Grid>
     </DockPanel>
 
+    <!-- ══════════════ COMMAND PALETTE OVERLAY ══════════════ -->
+    <Grid x:Name="CommandPaletteOverlay"
+          Visibility="{Binding CommandPalette.IsOpen, Converter={StaticResource BoolToVisibilityConverter}}"
+          Panel.ZIndex="9998"
+          Background="#40000000"
+          MouseDown="CommandPalette_BackdropClick">
+
+        <!-- Centered palette card -->
+        <Border HorizontalAlignment="Center" VerticalAlignment="Top"
+                Margin="0,80,0,0"
+                Width="560" MaxHeight="480"
+                Background="{DynamicResource PaneBg}"
+                BorderBrush="{DynamicResource ActivePaneBorder}"
+                BorderThickness="1"
+                CornerRadius="8"
+                MouseDown="CommandPalette_CardMouseDown">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.5" Color="Black"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Search input -->
+                <Border Grid.Row="0" Background="{DynamicResource InputBg}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                        CornerRadius="8,8,0,0" Padding="12,10">
+                    <DockPanel>
+                        <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify"
+                            Width="16" Height="16" Foreground="{DynamicResource SubTextFg}"
+                            VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox x:Name="PaletteSearchBox"
+                                 Text="{Binding CommandPalette.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="{DynamicResource TextFg}"
+                                 FontSize="14" FontFamily="Segoe UI"
+                                 CaretBrush="{DynamicResource TextFg}"
+                                 VerticalAlignment="Center"
+                                 PreviewKeyDown="PaletteSearchBox_PreviewKeyDown"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- Category hint -->
+                <Border Grid.Row="1" Background="{DynamicResource HeaderBg}"
+                        Padding="12,4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                    <TextBlock FontSize="10.5" Foreground="{DynamicResource SubTextFg}">
+                        <Run Text="↑↓ Navigate"/>
+                        <Run Text="  "/>
+                        <Run Text="Enter Select"/>
+                        <Run Text="  "/>
+                        <Run Text="Esc Close"/>
+                    </TextBlock>
+                </Border>
+
+                <!-- Command list -->
+                <ListBox Grid.Row="2" x:Name="PaletteList"
+                         ItemsSource="{Binding CommandPalette.FilteredCommands}"
+                         SelectedIndex="{Binding CommandPalette.SelectedIndex, Mode=TwoWay}"
+                         Background="Transparent" BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         VirtualizingStackPanel.VirtualizationMode="Recycling"
+                         MouseDoubleClick="PaletteList_MouseDoubleClick"
+                         PreviewMouseLeftButtonUp="PaletteList_MouseClick">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="12,7"/>
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelBg}"/>
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver" Value="True"/>
+                                                    <Condition Property="IsSelected" Value="False"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBg}"/>
+                                            </MultiTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:PaletteItemViewModel}">
+                            <DockPanel>
+                                <!-- Shortcut badge on right -->
+                                <Border DockPanel.Dock="Right" VerticalAlignment="Center"
+                                        Visibility="{Binding Shortcut, Converter={StaticResource NullToVisibilityConverter}}"
+                                        Background="{DynamicResource HeaderBg}"
+                                        CornerRadius="3" Padding="6,2" Margin="8,0,0,0">
+                                    <TextBlock Text="{Binding Shortcut}" FontSize="10.5"
+                                                FontFamily="Consolas"
+                                                Foreground="{DynamicResource SubTextFg}"/>
+                                </Border>
+                                <!-- Category + Icon + Name -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Border Background="{DynamicResource ButtonBg}" CornerRadius="3"
+                                            Padding="5,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Category}" FontSize="10"
+                                                    Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding Name}" FontSize="13"
+                                                Foreground="{DynamicResource TextFg}"
+                                                VerticalAlignment="Center"
+                                                TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+    </Grid>
+
     <!-- ══════════════ TOAST NOTIFICATIONS OVERLAY ══════════════ -->
     <ItemsControl x:Name="ToastHost"
                   ItemsSource="{Binding Source={x:Static svc:NotificationService.Instance}, Path=Notifications}"
