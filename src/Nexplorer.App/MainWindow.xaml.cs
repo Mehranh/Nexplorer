@@ -999,6 +999,49 @@ public partial class MainWindow : Window
             else
                 FocusPaneList(LeftList, Vm.LeftPane);
             e.Handled = true;
+            return;
+        }
+
+        // Left/Right arrows switch between left and right directory panes
+        if (Keyboard.Modifiers == ModifierKeys.None && IsListFocused())
+        {
+            if (e.Key == Key.Left)
+            {
+                if (Vm.ActivePane != Vm.LeftPane)
+                    FocusPaneList(LeftList, Vm.LeftPane);
+                e.Handled = true;
+                return;
+            }
+            if (e.Key == Key.Right)
+            {
+                if (Vm.ActivePane != Vm.RightPane)
+                    FocusPaneList(RightList, Vm.RightPane);
+                e.Handled = true;
+                return;
+            }
+        }
+
+        // Down arrow at last list item → focus bottom panel (command input)
+        if (e.Key == Key.Down && Keyboard.Modifiers == ModifierKeys.None && IsListFocused())
+        {
+            var list = Vm.ActivePane == Vm.LeftPane ? LeftList : RightList;
+            if (list.Items.Count == 0 || list.SelectedIndex == list.Items.Count - 1)
+            {
+                CommandInput.Focus();
+                e.Handled = true;
+                return;
+            }
+        }
+
+        // Up arrow from bottom panel → focus active directory pane
+        // (only when command input is empty and no suggestions are active, to preserve history navigation)
+        if (e.Key == Key.Up && Keyboard.Modifiers == ModifierKeys.None && IsBottomPanelFocused()
+            && string.IsNullOrEmpty(Vm.CommandText) && !Vm.ShowSuggestions)
+        {
+            var list = Vm.ActivePane == Vm.LeftPane ? LeftList : RightList;
+            FocusPaneList(list, Vm.ActivePane);
+            e.Handled = true;
+            return;
         }
     }
 
@@ -1151,6 +1194,17 @@ public partial class MainWindow : Window
         return focused is ListView
             || (focused is DependencyObject dep
                 && (IsDescendant(LeftList, dep) || IsDescendant(RightList, dep)));
+    }
+
+    private bool IsBottomPanelFocused()
+    {
+        var focused = Keyboard.FocusedElement as DependencyObject;
+        if (focused is null) return false;
+        // Check if focus is on CommandInput or any element in the bottom panel area
+        if (ReferenceEquals(focused, CommandInput)) return true;
+        if (ReferenceEquals(focused, TerminalOutput)) return true;
+        if (ReferenceEquals(focused, HistorySearchBox)) return true;
+        return false;
     }
 
     private static bool IsDescendant(DependencyObject parent, DependencyObject child)
