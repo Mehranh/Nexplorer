@@ -552,6 +552,20 @@ public partial class MainWindow : Window
             Vm.GitTab.SelectedFile = entry;
     }
 
+    private void GitChangedFilesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListBox lb)
+            Vm.GitTab.SelectedChangedFiles = lb.SelectedItems.Cast<Services.GitStatusEntry>().ToList();
+    }
+
+    private async void GitStageSelected_Click(object sender, RoutedEventArgs e)
+    {
+        if (Vm.GitTab.CurrentDirectory is null) return;
+        foreach (var entry in Vm.GitTab.SelectedChangedFiles.ToList())
+            await Services.GitService.StageFileAsync(Vm.GitTab.CurrentDirectory, entry.Path);
+        await Vm.GitTab.RefreshCommand.ExecuteAsync(null);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     //  BATCH RENAME
     // ═══════════════════════════════════════════════════════════════════════

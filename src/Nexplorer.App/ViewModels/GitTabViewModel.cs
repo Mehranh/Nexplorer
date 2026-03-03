@@ -205,7 +205,56 @@ public sealed partial class GitTabViewModel : ObservableObject
             "Discard Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
 
-        await GitService.DiscardFileAsync(CurrentDirectory, entry.Path);
+        if (entry.Status == GitChangeKind.Untracked)
+            await GitService.CleanUntrackedFileAsync(CurrentDirectory, entry.Path);
+        else
+            await GitService.DiscardFileAsync(CurrentDirectory, entry.Path);
+        await RefreshAsync();
+    }
+
+    // ── Multi-select revert ──────────────────────────────────────────────
+
+    private List<GitStatusEntry> _selectedChangedFiles = new();
+    public List<GitStatusEntry> SelectedChangedFiles
+    {
+        get => _selectedChangedFiles;
+        set { _selectedChangedFiles = value; OnPropertyChanged(nameof(HasSelectedChanges)); }
+    }
+
+    public bool HasSelectedChanges => _selectedChangedFiles.Count > 0;
+
+    [RelayCommand]
+    private async Task DiscardSelectedAsync()
+    {
+        if (CurrentDirectory is null || _selectedChangedFiles.Count == 0) return;
+
+        var count = _selectedChangedFiles.Count;
+        var result = MessageBox.Show(
+            $"Discard changes to {count} file(s)?\nThis cannot be undone.",
+            "Discard Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
+
+        foreach (var entry in _selectedChangedFiles.ToList())
+        {
+            if (entry.Status == GitChangeKind.Untracked)
+                await GitService.CleanUntrackedFileAsync(CurrentDirectory, entry.Path);
+            else
+                await GitService.DiscardFileAsync(CurrentDirectory, entry.Path);
+        }
+        await RefreshAsync();
+    }
+
+    [RelayCommand]
+    private async Task DiscardAllAsync()
+    {
+        if (CurrentDirectory is null || ChangedFiles.Count == 0) return;
+
+        var result = MessageBox.Show(
+            $"Discard ALL {ChangedFiles.Count} change(s)?\nThis cannot be undone.",
+            "Discard All Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
+
+        await GitService.DiscardAllAsync(CurrentDirectory);
         await RefreshAsync();
     }
 

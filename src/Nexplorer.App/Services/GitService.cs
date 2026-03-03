@@ -111,10 +111,30 @@ public static class GitService
         string workingDirectory, CancellationToken ct = default)
         => RunGitAsync(workingDirectory, "reset HEAD", ct);
 
-    /// <summary>Discard changes to a file (restore from HEAD).</summary>
+    /// <summary>Discard changes to a tracked file (restore from HEAD).</summary>
     public static Task<string?> DiscardFileAsync(
         string workingDirectory, string filePath, CancellationToken ct = default)
         => RunGitAsync(workingDirectory, $"checkout -- \"{filePath}\"", ct);
+
+    /// <summary>Remove an untracked file from the working tree.</summary>
+    public static Task CleanUntrackedFileAsync(
+        string workingDirectory, string filePath, CancellationToken ct = default)
+    {
+        var fullPath = System.IO.Path.Combine(workingDirectory, filePath);
+        if (File.Exists(fullPath))
+            File.Delete(fullPath);
+        else if (System.IO.Directory.Exists(fullPath))
+            System.IO.Directory.Delete(fullPath, recursive: true);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Discard all unstaged changes and remove untracked files.</summary>
+    public static async Task<string?> DiscardAllAsync(
+        string workingDirectory, CancellationToken ct = default)
+    {
+        await RunGitAsync(workingDirectory, "checkout -- .", ct);
+        return await RunGitAsync(workingDirectory, "clean -fd", ct);
+    }
 
     /// <summary>Commit staged changes.</summary>
     public static Task<string?> CommitAsync(

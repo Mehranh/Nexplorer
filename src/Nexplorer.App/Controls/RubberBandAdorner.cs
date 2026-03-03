@@ -37,7 +37,10 @@ public sealed class RubberBandAdorner : Adorner
 
     public void UpdateEndPoint(Point endPoint)
     {
-        _endPoint = endPoint;
+        var size = AdornedElement.RenderSize;
+        _endPoint = new Point(
+            Math.Clamp(endPoint.X, 0, size.Width),
+            Math.Clamp(endPoint.Y, 0, size.Height));
         InvalidateVisual();
     }
 

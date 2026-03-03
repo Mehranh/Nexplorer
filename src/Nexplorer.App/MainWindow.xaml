@@ -2035,10 +2035,16 @@
                                         <!-- ── CHANGED (UNSTAGED) FILES ── -->
                                         <Border Padding="8,6,8,2" Background="{DynamicResource PaneBg}" Margin="0,2,0,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Right" Command="{Binding StageAllCommand}"
-                                                        Style="{StaticResource NavButton}" Width="18" Height="18" ToolTip="Stage All">
-                                                    <iconPacks:PackIconMaterial Kind="PlusBox" Width="9" Height="9"/>
-                                                </Button>
+                                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                                    <Button Command="{Binding DiscardAllCommand}"
+                                                            Style="{StaticResource NavButton}" Width="18" Height="18" ToolTip="Discard All Changes" Margin="0,0,2,0">
+                                                        <iconPacks:PackIconMaterial Kind="UndoVariant" Width="9" Height="9"/>
+                                                    </Button>
+                                                    <Button Command="{Binding StageAllCommand}"
+                                                            Style="{StaticResource NavButton}" Width="18" Height="18" ToolTip="Stage All">
+                                                        <iconPacks:PackIconMaterial Kind="PlusBox" Width="9" Height="9"/>
+                                                    </Button>
+                                                </StackPanel>
                                                 <TextBlock FontSize="11" Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center">
                                                     <Run Text="Changes" FontWeight="SemiBold"/>
                                                     <Run Text=" ("/>
@@ -2047,33 +2053,54 @@
                                                 </TextBlock>
                                             </DockPanel>
                                         </Border>
-                                        <ItemsControl ItemsSource="{Binding ChangedFiles}">
-                                            <ItemsControl.ItemTemplate>
+                                        <ListBox x:Name="GitChangedFilesList"
+                                                 ItemsSource="{Binding ChangedFiles}"
+                                                 SelectionMode="Extended"
+                                                 SelectionChanged="GitChangedFilesList_SelectionChanged"
+                                                 Background="Transparent" BorderThickness="0"
+                                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem">
+                                                    <Setter Property="Padding" Value="0"/>
+                                                    <Setter Property="Margin" Value="0"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="ListBoxItem">
+                                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                                        Padding="{TemplateBinding Padding}">
+                                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBg}"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsSelected" Value="True">
+                                                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelBg}"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                            <ListBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Padding="8,3" Cursor="Hand"
                                                             MouseLeftButtonDown="GitFile_Click"
-                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="Background" Value="Transparent"/>
-                                                                <Style.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter Property="Background" Value="{DynamicResource HoverBg}"/>
-                                                                    </Trigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
+                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
                                                         <DockPanel>
                                                             <!-- Action buttons -->
                                                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="4,0,0,0">
                                                                 <Button ToolTip="Discard Changes"
-                                                                        Command="{Binding DataContext.DiscardFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        Command="{Binding DataContext.DiscardFileCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                                         CommandParameter="{Binding}"
                                                                         Style="{StaticResource NavButton}" Width="18" Height="18">
                                                                     <iconPacks:PackIconMaterial Kind="UndoVariant" Width="8" Height="8"/>
                                                                 </Button>
                                                                 <Button ToolTip="Stage"
-                                                                        Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                                         CommandParameter="{Binding}"
                                                                         Style="{StaticResource NavButton}" Width="18" Height="18">
                                                                     <iconPacks:PackIconMaterial Kind="Plus" Width="8" Height="8"/>
@@ -2098,8 +2125,32 @@
                                                         </DockPanel>
                                                     </Border>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            </ListBox.ItemTemplate>
+                                            <ListBox.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Discard Selected" Command="{Binding DiscardSelectedCommand}"
+                                                              InputGestureText="Del">
+                                                        <MenuItem.Icon>
+                                                            <iconPacks:PackIconMaterial Kind="UndoVariant" Width="12" Height="12"
+                                                                                       Background="Transparent" Foreground="{DynamicResource TextFg}"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Discard All" Command="{Binding DiscardAllCommand}">
+                                                        <MenuItem.Icon>
+                                                            <iconPacks:PackIconMaterial Kind="DeleteSweep" Width="12" Height="12"
+                                                                                       Background="Transparent" Foreground="{DynamicResource TextFg}"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <Separator/>
+                                                    <MenuItem Header="Stage Selected" Click="GitStageSelected_Click">
+                                                        <MenuItem.Icon>
+                                                            <iconPacks:PackIconMaterial Kind="Plus" Width="12" Height="12"
+                                                                                       Background="Transparent" Foreground="{DynamicResource TextFg}"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </ListBox.ContextMenu>
+                                        </ListBox>
                                     </StackPanel>
                                 </ScrollViewer>
                             </DockPanel>
