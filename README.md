@@ -21,6 +21,8 @@ Nexplorer combines the power of **Directory Opus**-style advanced file managemen
 
 ![Windows 11](https://img.shields.io/badge/Windows%2011-0078D4?style=for-the-badge&logo=windows11&logoColor=white)
 
+![Nexplorer](docs/poster.png)
+
 ---
 
 ## Table of Contents
