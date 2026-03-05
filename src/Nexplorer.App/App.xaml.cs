@@ -68,6 +68,7 @@ public partial class App : Application
             // iOS Files-inspired modern theme — clean, airy, soft depth
             SetBrush(res, "AppBg",           "#F2F2F7");  // iOS grouped background
             SetBrush(res, "PaneBg",          "#FFFFFF");  // card/surface white
+            SetBrush(res, "MenuBg",          "#FFFFFF");  
             SetBrush(res, "TreeBg",          "#F2F2F7");  // sidebar matches bg
             SetBrush(res, "HeaderBg",        "#FBFBFD");  // translucent-feel nav bar
             SetBrush(res, "StatusBg",        "#F2F2F7");
@@ -126,6 +127,7 @@ public partial class App : Application
         {
             SetImageBrush(res, "AppBg", "pack://application:,,,/background.png");
             SetBrush(res, "PaneBg",          "#880F172A"); // Glassy
+            SetBrush(res, "MenuBg",          "#0F172A"); // Solid dark void
             SetBrush(res, "TreeBg",          "#770B101E");
             SetBrush(res, "HeaderBg",        "#99131C31");
             SetBrush(res, "StatusBg",        "#990A0F1D");
@@ -182,6 +184,7 @@ public partial class App : Application
         {
             SetBrush(res, "AppBg",           "#F5F5F5");
             SetBrush(res, "PaneBg",          "#FFFFFF");
+            SetBrush(res, "MenuBg",          "#FFFFFF");
             SetBrush(res, "TreeBg",          "#F3F3F3");
             SetBrush(res, "HeaderBg",        "#E8E8E8");
             SetBrush(res, "StatusBg",        "#F3F3F3");
@@ -237,6 +240,7 @@ public partial class App : Application
         {
             SetBrush(res, "AppBg",           "#1C1C1C");
             SetBrush(res, "PaneBg",          "#252526");
+            SetBrush(res, "MenuBg",          "#252526");
             SetBrush(res, "TreeBg",          "#1E1E1E");
             SetBrush(res, "HeaderBg",        "#2D2D30");
             SetBrush(res, "StatusBg",        "#1E1E1E");

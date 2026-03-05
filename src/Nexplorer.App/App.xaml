@@ -195,7 +195,7 @@
                                           MinWidth="{TemplateBinding ActualWidth}"
                                           MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                         <Border x:Name="DropDownBorder"
-                                                Background="{DynamicResource PaneBg}"
+                                                Background="{DynamicResource MenuBg}"
                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                 BorderThickness="1" CornerRadius="2">
                                             <ScrollViewer Margin="2" SnapsToDevicePixels="True">
@@ -378,7 +378,7 @@
 
             <!-- ── ContextMenu (dark) ────────────────────────────────────── -->
             <Style TargetType="ContextMenu">
-                <Setter Property="Background"      Value="{DynamicResource PaneBg}"/>
+                <Setter Property="Background"      Value="{DynamicResource MenuBg}"/>
                 <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding"         Value="0,3"/>
