@@ -25,6 +25,8 @@
 
   <ItemGroup>
     <Resource Include="nexplorer.ico" />
+    <Resource Include="logo.png" />
+    <Resource Include="background.png" />
   </ItemGroup>
 
   <ItemGroup>

@@ -54,6 +54,20 @@
             <SolidColorBrush x:Key="DangerBorder"     Color="#8B3030"/>
             <SolidColorBrush x:Key="DangerHoverBg"    Color="#5A2020"/>
 
+            <!-- ── Branded background assets (WPF Resources) ────────────── -->
+            <ImageBrush x:Key="AppBackgroundImage"
+                        ImageSource="pack://application:,,,/background.png"
+                        Stretch="UniformToFill" />
+
+            <!-- ── Glass variants (same RGB as palette, with alpha) ─────── -->
+            <SolidColorBrush x:Key="GlassAppBg"       Color="#B31C1C1C"/>
+            <SolidColorBrush x:Key="GlassPaneBg"      Color="#CC252526"/>
+            <SolidColorBrush x:Key="GlassTreeBg"      Color="#B31E1E1E"/>
+            <SolidColorBrush x:Key="GlassHeaderBg"    Color="#B32D2D30"/>
+            <SolidColorBrush x:Key="GlassStatusBg"    Color="#B31E1E1E"/>
+            <SolidColorBrush x:Key="GlassTerminalBg"  Color="#CC0C0C0C"/>
+            <SolidColorBrush x:Key="GlassBorderBrush" Color="#803F3F46"/>
+
             <!-- Diff / Git themed colours -->
             <SolidColorBrush x:Key="DiffBg"              Color="#1A1A1A"/>
             <SolidColorBrush x:Key="DiffAddedHeaderBg"   Color="#152D15"/>

@@ -22,8 +22,10 @@
 
         <Style x:Key="PaneContainer" TargetType="Border">
             <Setter Property="Background"     Value="{DynamicResource PaneBg}"/>
-            <Setter Property="BorderThickness" Value="2,0,0,0"/>
-            <Setter Property="BorderBrush"     Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="CornerRadius"    Value="{DynamicResource PaneCornerRadius}"/>
+            <Setter Property="Margin"          Value="{DynamicResource PaneMargin}"/>
         </Style>
 
         <!-- Shared context menu for file panes -->
@@ -414,7 +416,8 @@
 
             <!-- ═══ COL 0: FOLDER TREE ═══ -->
             <Border Grid.Column="0" Background="{DynamicResource TreeBg}"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0"
+                    CornerRadius="{DynamicResource PaneCornerRadius}" Margin="{DynamicResource PaneMargin}">
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBg}"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="10,5">
@@ -2841,3 +2844,4 @@
     </ItemsControl>
     </Grid>
 </Window>
+

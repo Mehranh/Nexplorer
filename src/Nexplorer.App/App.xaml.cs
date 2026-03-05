@@ -118,6 +118,65 @@ public partial class App : Application
             SetBrush(res, "HeaderSeparator",    "#E5E5EA");  // hairline iOS separator
             SetBrush(res, "FKeyBg",            "#FFFFFF");   // card-white F-key buttons
             SetBrush(res, "FKeyBorder",        "#D1D1D6");   // subtle border
+            
+            res["PaneCornerRadius"] = new CornerRadius(0);
+            res["AppBorderThickness"] = new Thickness(0); res["PaneMargin"] = new Thickness(0);
+        }
+        else if (effective == AppTheme.NeonSpace)
+        {
+            SetImageBrush(res, "AppBg", "pack://application:,,,/background.png");
+            SetBrush(res, "PaneBg",          "#880F172A"); // Glassy
+            SetBrush(res, "TreeBg",          "#770B101E");
+            SetBrush(res, "HeaderBg",        "#99131C31");
+            SetBrush(res, "StatusBg",        "#990A0F1D");
+            SetBrush(res, "TerminalBg",      "#AA050811");
+            SetBrush(res, "InputBg",         "#BB151F38");
+            SetBrush(res, "BorderBrush",     "#2DD4BF");
+            SetBrush(res, "TextFg",          "#F1F5F9");
+            SetBrush(res, "SubTextFg",       "#94A3B8");
+            SetBrush(res, "AccentBrush",     "#22D3EE");
+            SetBrush(res, "HoverBg",         "#1E293B");
+            SetBrush(res, "SelBg",           "#0F766E");
+            SetBrush(res, "SelBgInactive",   "#334155");
+            SetBrush(res, "ActivePaneBorder","#2DD4BF");
+            SetBrush(res, "ButtonBg",        "#1E293B");
+            SetBrush(res, "ButtonHoverBg",   "#334155");
+            SetBrush(res, "ButtonPressedBg", "#475569");
+            SetBrush(res, "InactiveTextFg",  "#475569");
+            SetBrush(res, "DangerBorder",    "#F43F5E");
+            SetBrush(res, "DangerHoverBg",   "#9F1239");
+
+            SetBrush(res, "DiffBg",              "#020617");
+            SetBrush(res, "DiffAddedHeaderBg",   "#064E3B");
+            SetBrush(res, "DiffRemovedHeaderBg", "#7F1D1D");
+            SetBrush(res, "DiffAddedFg",         "#34D399");
+            SetBrush(res, "DiffRemovedFg",       "#F87171");
+            SetBrush(res, "DiffAddedSubFg",      "#10B981");
+            SetBrush(res, "DiffRemovedSubFg",    "#EF4444");
+            SetBrush(res, "DiffUnchangedFg",     "#94A3B8");
+            SetBrush(res, "DiffLineNumFg",       "#475569");
+            SetBrush(res, "GitStatusBg",         "#064E3B");
+            SetBrush(res, "GitStatusFg",         "#10B981");
+            SetBrush(res, "GitAvatarBg",         "#022C22");
+            SetBrush(res, "GitAvatarFg",         "#10B981");
+            SetBrush(res, "FolderNameFg",        "#38BDF8");
+            SetBrush(res, "HashFg",              "#A78BFA");
+            SetBrush(res, "HistorySearchLabelFg", "#2DD4BF");
+            SetBrush(res, "HistorySearchResultFg", "#FBBF24");
+
+            SetBrush(res, "ScrollThumbBg",      "#334155");
+            SetBrush(res, "ScrollThumbHoverBg", "#475569");
+            SetBrush(res, "ScrollThumbDragBg",  "#64748B");
+            SetBrush(res, "ScrollTrackBg",      "#0F172A");
+            SetBrush(res, "NavIconFg",          "#38BDF8");
+            SetBrush(res, "NavIconHoverFg",     "#7DD3FC");
+            SetBrush(res, "HeaderSeparator",    "#1E293B");
+            SetBrush(res, "FKeyBg",            "#0F172A");
+            SetBrush(res, "FKeyBorder",        "#2DD4BF");
+            
+            res["PaneCornerRadius"] = new CornerRadius(12);
+            res["AppBorderThickness"] = new Thickness(1);
+            res["PaneMargin"] = new Thickness(8);
         }
         else if (effective == AppTheme.Light)
         {
@@ -170,6 +229,9 @@ public partial class App : Application
             SetBrush(res, "HeaderSeparator",    "#D4D4D4");
             SetBrush(res, "FKeyBg",            "#E8E8E8");
             SetBrush(res, "FKeyBorder",        "#D4D4D4");
+            
+            res["PaneCornerRadius"] = new CornerRadius(0);
+            res["AppBorderThickness"] = new Thickness(0); res["PaneMargin"] = new Thickness(0);
         }
         else
         {
@@ -222,6 +284,9 @@ public partial class App : Application
             SetBrush(res, "HeaderSeparator",    "#3F3F46");
             SetBrush(res, "FKeyBg",            "#2D2D30");
             SetBrush(res, "FKeyBorder",        "#3F3F46");
+            
+            res["PaneCornerRadius"] = new CornerRadius(0);
+            res["AppBorderThickness"] = new Thickness(0); res["PaneMargin"] = new Thickness(0);
         }
     }
 
@@ -229,5 +294,14 @@ public partial class App : Application
     {
         var color = (Color)ColorConverter.ConvertFromString(hex);
         res[key] = new SolidColorBrush(color);
+    }
+
+    private static void SetImageBrush(ResourceDictionary res, string key, string uri)
+    {
+        res[key] = new System.Windows.Media.ImageBrush(new System.Windows.Media.Imaging.BitmapImage(new Uri(uri)))
+        {
+            Stretch = System.Windows.Media.Stretch.UniformToFill,
+            Opacity = 0.8
+        };
     }
 }
