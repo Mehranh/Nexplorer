@@ -47,6 +47,23 @@
       </Component>
     </StandardDirectory>
 
+    <!-- Start Menu shortcut -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="NexplorerStartMenuFolder" Name="Nexplorer">
+        <Component Id="StartMenuShortcut" Guid="A3B7C4D1-5E6F-4A8B-9C0D-1E2F3A4B5C6D">
+          <Shortcut Id="StartMenuShortcutLink"
+                    Name="Nexplorer"
+                    Description="Nexplorer File Explorer"
+                    Target="[INSTALLFOLDER]Nexplorer.App.exe"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="NexplorerIcon" />
+          <RemoveFolder Id="RemoveNexplorerStartMenuFolder" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\Nexplorer"
+                         Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
     <!-- Harvest all remaining files from publish folder -->
     <ComponentGroup Id="PublishedFiles" Directory="INSTALLFOLDER">
       <Files Include="..\publish\Nexplorer\**">
@@ -58,6 +75,7 @@
     <Feature Id="Complete" Title="Nexplorer" Level="1">
       <ComponentRef Id="MainExe" />
       <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="StartMenuShortcut" />
       <ComponentGroupRef Id="PublishedFiles" />
     </Feature>
 
