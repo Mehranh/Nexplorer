@@ -14,8 +14,9 @@
         Foreground="{DynamicResource TextFg}"
         FontFamily="Segoe UI" FontSize="13"
         WindowStyle="SingleBorderWindow"
-        KeyboardNavigation.TabNavigation="None"
-        KeyboardNavigation.DirectionalNavigation="None">
+        AutomationProperties.Name="Nexplorer file explorer"
+        KeyboardNavigation.TabNavigation="Cycle"
+        KeyboardNavigation.DirectionalNavigation="Continue">
 
     <Window.Resources>
         <CubicEase x:Key="ToastEase" EasingMode="EaseOut"/>
@@ -134,7 +135,8 @@
                     <Button DockPanel.Dock="Right" Tag="{Binding}" Click="TabClose_Click"
                             Background="Transparent" BorderThickness="0"
                             Cursor="Hand" Width="16" Height="16" Padding="2"
-                            Margin="0,0,4,0" VerticalAlignment="Center" ToolTip="Close Tab">
+                            Margin="0,0,4,0" VerticalAlignment="Center" ToolTip="Close Tab"
+                            AutomationProperties.Name="Close tab">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="Transparent" Padding="2">
@@ -516,7 +518,8 @@
                                 <DockPanel DataContext="{Binding LeftTabs}">
                                     <Button DockPanel.Dock="Right" Command="{Binding AddTabCommand}"
                                             Style="{StaticResource NavButton}" Width="28" Height="26"
-                                            ToolTip="New Tab" Margin="2,0">
+                                            ToolTip="New Tab" Margin="2,0"
+                                            AutomationProperties.Name="New tab in left pane">
                                         <iconPacks:PackIconMaterial Kind="Plus" Width="10" Height="10"/>
                                     </Button>
                                     <ItemsControl ItemsSource="{Binding Tabs}" ItemTemplate="{StaticResource PaneTabTemplate}">
@@ -531,37 +534,33 @@
                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4,3">
                                 <DockPanel>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="0,0,4,0">
-                                        <Button Command="{Binding LeftPane.NavigateBackCommand}" Style="{StaticResource NavButton}" ToolTip="Back">
+                                        <Button Command="{Binding LeftPane.NavigateBackCommand}" Style="{StaticResource NavButton}" ToolTip="Back" AutomationProperties.Name="Back">
                                             <iconPacks:PackIconMaterial Kind="ChevronLeft" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding LeftPane.NavigateForwardCommand}" Style="{StaticResource NavButton}" ToolTip="Forward">
+                                        <Button Command="{Binding LeftPane.NavigateForwardCommand}" Style="{StaticResource NavButton}" ToolTip="Forward" AutomationProperties.Name="Forward">
                                             <iconPacks:PackIconMaterial Kind="ChevronRight" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding LeftPane.NavigateUpCommand}" Style="{StaticResource NavButton}" ToolTip="Up">
+                                        <Button Command="{Binding LeftPane.NavigateUpCommand}" Style="{StaticResource NavButton}" ToolTip="Up" AutomationProperties.Name="Up one level">
                                             <iconPacks:PackIconMaterial Kind="ArrowUp" Width="13" Height="13"/>
                                         </Button>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                                        <Button x:Name="LeftViewModeButton" Style="{StaticResource NavButton}" ToolTip="View Mode" Click="LeftViewModeButton_Click">
+                                        <Button x:Name="LeftViewModeButton" Style="{StaticResource NavButton}" ToolTip="View Mode" Click="LeftViewModeButton_Click" AutomationProperties.Name="View mode">
                                             <iconPacks:PackIconMaterial Kind="ViewList" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding LeftPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter (Ctrl+F)">
+                                        <Button Command="{Binding LeftPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter (Ctrl+F)" AutomationProperties.Name="Toggle filter">
                                             <iconPacks:PackIconMaterial Kind="Filter" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding LeftPane.TogglePreviewCommand}" Style="{StaticResource NavButton}" ToolTip="Preview (F8)">
+                                        <Button Command="{Binding LeftPane.TogglePreviewCommand}" Style="{StaticResource NavButton}" ToolTip="Preview (F8)" AutomationProperties.Name="Toggle preview pane">
                                             <iconPacks:PackIconMaterial Kind="Eye" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding LeftPane.NavigateCommand}" Style="{StaticResource NavButton}" ToolTip="Refresh" Margin="4,0,0,0">
+                                        <Button Command="{Binding LeftPane.NavigateCommand}" Style="{StaticResource NavButton}" ToolTip="Refresh" Margin="4,0,0,0" AutomationProperties.Name="Refresh">
                                             <iconPacks:PackIconMaterial Kind="Refresh" Width="13" Height="13"/>
                                         </Button>
                                     </StackPanel>
-                                    <TextBox Text="{Binding LeftPane.CurrentPath, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="Transparent" BorderThickness="0"
-                                             FontFamily="Cascadia Code,Consolas,Segoe UI" FontSize="12" VerticalContentAlignment="Center">
-                                        <TextBox.InputBindings>
-                                            <KeyBinding Key="Enter" Command="{Binding LeftPane.NavigateCommand}"/>
-                                        </TextBox.InputBindings>
-                                    </TextBox>
+                                    <ctrl:BreadcrumbBar Path="{Binding LeftPane.CurrentPath, Mode=TwoWay}"
+                                                        NavigateCommand="{Binding LeftPane.GoToPathCommand}"
+                                                        VerticalAlignment="Center"/>
                                 </DockPanel>
                             </Border>
                             <!-- Filter bar (collapsible) -->
@@ -573,7 +572,8 @@
                                     <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify" Width="12" Height="12"
                                                                 Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <Button DockPanel.Dock="Right" Command="{Binding LeftPane.ClearFilterCommand}"
-                                            Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter">
+                                            Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter"
+                                            AutomationProperties.Name="Clear filter">
                                         <iconPacks:PackIconMaterial Kind="Close" Width="9" Height="9"/>
                                     </Button>
                                     <TextBox x:Name="LeftFilterBox"
@@ -774,7 +774,8 @@
                                 <DockPanel DataContext="{Binding RightTabs}">
                                     <Button DockPanel.Dock="Right" Command="{Binding AddTabCommand}"
                                             Style="{StaticResource NavButton}" Width="28" Height="26"
-                                            ToolTip="New Tab" Margin="2,0">
+                                            ToolTip="New Tab" Margin="2,0"
+                                            AutomationProperties.Name="New tab in right pane">
                                         <iconPacks:PackIconMaterial Kind="Plus" Width="10" Height="10"/>
                                     </Button>
                                     <ItemsControl ItemsSource="{Binding Tabs}" ItemTemplate="{StaticResource PaneTabTemplate}">
@@ -789,37 +790,33 @@
                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4,3">
                                 <DockPanel>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="0,0,4,0">
-                                        <Button Command="{Binding RightPane.NavigateBackCommand}" Style="{StaticResource NavButton}" ToolTip="Back">
+                                        <Button Command="{Binding RightPane.NavigateBackCommand}" Style="{StaticResource NavButton}" ToolTip="Back" AutomationProperties.Name="Back">
                                             <iconPacks:PackIconMaterial Kind="ChevronLeft" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding RightPane.NavigateForwardCommand}" Style="{StaticResource NavButton}" ToolTip="Forward">
+                                        <Button Command="{Binding RightPane.NavigateForwardCommand}" Style="{StaticResource NavButton}" ToolTip="Forward" AutomationProperties.Name="Forward">
                                             <iconPacks:PackIconMaterial Kind="ChevronRight" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding RightPane.NavigateUpCommand}" Style="{StaticResource NavButton}" ToolTip="Up">
+                                        <Button Command="{Binding RightPane.NavigateUpCommand}" Style="{StaticResource NavButton}" ToolTip="Up" AutomationProperties.Name="Up one level">
                                             <iconPacks:PackIconMaterial Kind="ArrowUp" Width="13" Height="13"/>
                                         </Button>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                                        <Button x:Name="RightViewModeButton" Style="{StaticResource NavButton}" ToolTip="View Mode" Click="RightViewModeButton_Click">
+                                        <Button x:Name="RightViewModeButton" Style="{StaticResource NavButton}" ToolTip="View Mode" Click="RightViewModeButton_Click" AutomationProperties.Name="View mode">
                                             <iconPacks:PackIconMaterial Kind="ViewList" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding RightPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter (Ctrl+F)">
+                                        <Button Command="{Binding RightPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter (Ctrl+F)" AutomationProperties.Name="Toggle filter">
                                             <iconPacks:PackIconMaterial Kind="Filter" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding RightPane.TogglePreviewCommand}" Style="{StaticResource NavButton}" ToolTip="Preview (F8)">
+                                        <Button Command="{Binding RightPane.TogglePreviewCommand}" Style="{StaticResource NavButton}" ToolTip="Preview (F8)" AutomationProperties.Name="Toggle preview pane">
                                             <iconPacks:PackIconMaterial Kind="Eye" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding RightPane.NavigateCommand}" Style="{StaticResource NavButton}" ToolTip="Refresh" Margin="4,0,0,0">
+                                        <Button Command="{Binding RightPane.NavigateCommand}" Style="{StaticResource NavButton}" ToolTip="Refresh" Margin="4,0,0,0" AutomationProperties.Name="Refresh">
                                             <iconPacks:PackIconMaterial Kind="Refresh" Width="13" Height="13"/>
                                         </Button>
                                     </StackPanel>
-                                    <TextBox Text="{Binding RightPane.CurrentPath, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="Transparent" BorderThickness="0"
-                                             FontFamily="Cascadia Code,Consolas,Segoe UI" FontSize="12" VerticalContentAlignment="Center">
-                                        <TextBox.InputBindings>
-                                            <KeyBinding Key="Enter" Command="{Binding RightPane.NavigateCommand}"/>
-                                        </TextBox.InputBindings>
-                                    </TextBox>
+                                    <ctrl:BreadcrumbBar Path="{Binding RightPane.CurrentPath, Mode=TwoWay}"
+                                                        NavigateCommand="{Binding RightPane.GoToPathCommand}"
+                                                        VerticalAlignment="Center"/>
                                 </DockPanel>
                             </Border>
                             <!-- Filter bar -->
@@ -831,7 +828,8 @@
                                     <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify" Width="12" Height="12"
                                                                 Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <Button DockPanel.Dock="Right" Command="{Binding RightPane.ClearFilterCommand}"
-                                            Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter">
+                                            Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter"
+                                            AutomationProperties.Name="Clear filter">
                                         <iconPacks:PackIconMaterial Kind="Close" Width="9" Height="9"/>
                                     </Button>
                                     <TextBox x:Name="RightFilterBox"

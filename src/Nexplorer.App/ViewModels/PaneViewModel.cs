@@ -209,6 +209,23 @@ public sealed partial class PaneViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private Task NavigateAsync() => GoToAsync(CurrentPath, pushHistory: false);
 
+    /// <summary>
+    /// Navigate to an arbitrary path (used by the breadcrumb address bar).
+    /// Pushes current path onto the back stack so Back returns to where we came from.
+    /// </summary>
+    [RelayCommand]
+    private Task GoToPathAsync(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return Task.CompletedTask;
+        // Don't re-navigate if the user clicked the segment we're already in
+        if (string.Equals(
+                System.IO.Path.TrimEndingDirectorySeparator(path),
+                System.IO.Path.TrimEndingDirectorySeparator(CurrentPath ?? string.Empty),
+                StringComparison.OrdinalIgnoreCase))
+            return Task.CompletedTask;
+        return GoToAsync(path, pushHistory: true);
+    }
+
     [RelayCommand(CanExecute = nameof(CanNavigateBack))]
     private Task NavigateBackAsync()
     {
