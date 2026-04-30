@@ -1,5 +1,5 @@
 {
-  "version": "1.0.21",
+  "version": "1.0.22",
   "downloadUrl": "https://github.com/Mehranh/Nexplorer/releases/latest/download/Nexplorer-Setup.msi",
-  "releaseNotes": "Version bump to 1.0.21."
+  "releaseNotes": "Search now matches files in nested subdirectories. The inline filter (toolbar funnel / Ctrl+F) recursively streams matches from subfolders with a path subtitle, and wildcard queries like *.txt work in the Search dialog. Ctrl+F now opens the deep Search dialog by default."
 }
