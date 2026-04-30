@@ -6,6 +6,7 @@
         xmlns:vm="clr-namespace:Nexplorer.App.ViewModels"
         xmlns:svc="clr-namespace:Nexplorer.App.Services"
         xmlns:ctrl="clr-namespace:Nexplorer.App.Controls"
+        xmlns:conv="clr-namespace:Nexplorer.App.Converters"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="Nexplorer" Height="840" Width="1520"
@@ -32,17 +33,13 @@
         <!-- Shared context menu for file panes -->
         <ContextMenu x:Key="PaneContextMenu"
                      DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+
+            <!-- ── Top-level: the 8 most-used commands ─────────────────────── -->
             <MenuItem Header="Open"           Command="{Binding OpenSelectedCommand}"     InputGestureText="Enter">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="OpenInApp" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Open With"      Command="{Binding OpenWithCommand}">
+            <MenuItem Header="Open With…"     Command="{Binding OpenWithCommand}">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="ApplicationEditOutline" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Quick Edit"    Click="QuickEdit_Click"               InputGestureText="F3">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FileEditOutline" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Diff Files (L ↔ R)" Click="DiffFiles_Click" InputGestureText="Ctrl+D">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FileCompare" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
             <Separator/>
             <MenuItem Header="Cut"            Command="{Binding CutSelectedCommand}"     InputGestureText="Ctrl+X">
@@ -55,54 +52,62 @@
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="ContentPaste" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Header="Copy as Path"   Command="{Binding CopyPathCommand}"        InputGestureText="Ctrl+Shift+C"/>
-            <Separator/>
             <MenuItem Header="Rename"         Command="{Binding BeginRenameCommand}"     InputGestureText="F2">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="RenameBox" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="Delete"         Command="{Binding DeleteSelectedCommand}"  InputGestureText="Del">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Delete" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
+
+            <!-- ── Submenu: Send to (cross-pane + clipboard variants) ─────── -->
             <Separator/>
-            <MenuItem Header="New Folder"     Command="{Binding NewFolderCommand}"       InputGestureText="F7">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FolderPlus" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+            <MenuItem Header="Send to"        IsEnabled="{Binding HasSelection}">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Send" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+                <MenuItem Header="Copy to other pane"  Click="CopyToOtherPane_Click"  InputGestureText="F5"/>
+                <MenuItem Header="Move to other pane"  Click="MoveToOtherPane_Click"  InputGestureText="F6"/>
+                <Separator/>
+                <MenuItem Header="Copy as path"        Command="{Binding CopyPathCommand}" InputGestureText="Ctrl+Shift+C"/>
             </MenuItem>
-            <MenuItem Header="New File"       Command="{Binding NewFileCommand}"         InputGestureText="Ctrl+N">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FilePlus" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+
+            <!-- ── Submenu: Compare ───────────────────────────────────────── -->
+            <MenuItem Header="Compare">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FileCompare" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+                <MenuItem Header="Quick edit"          Click="QuickEdit_Click"   InputGestureText="F3"/>
+                <MenuItem Header="Diff files (L ↔ R)"  Click="DiffFiles_Click"   InputGestureText="Ctrl+D"/>
             </MenuItem>
+
+            <!-- ── Submenu: New ───────────────────────────────────────────── -->
+            <MenuItem Header="New">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Plus" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+                <MenuItem Header="New folder"  Command="{Binding NewFolderCommand}" InputGestureText="F7"/>
+                <MenuItem Header="New file"    Command="{Binding NewFileCommand}"   InputGestureText="Ctrl+N"/>
+            </MenuItem>
+
+            <!-- ── Submenu: Tools (advanced, lower-frequency operations) ──── -->
+            <MenuItem Header="Tools">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Tools" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+                <MenuItem Header="Batch rename…"       Click="BatchRename_Click"         InputGestureText="Ctrl+M" IsEnabled="{Binding HasSelection}"/>
+                <MenuItem Header="Open terminal here"  Command="{Binding OpenTerminalHereCommand}"/>
+                <MenuItem Header="Git history"         Click="GitHistory_Click"          InputGestureText="Ctrl+G"/>
+                <MenuItem Header="Space radar"         Click="SpaceRadar_Click"          InputGestureText="Ctrl+Shift+R"/>
+                <Separator/>
+                <MenuItem Header="Go to other pane's folder"  Click="GoToOtherPaneFolder_Click"/>
+            </MenuItem>
+
+            <!-- ── View / selection / metadata ───────────────────────────── -->
             <Separator/>
-            <MenuItem Header="Copy to Other Pane"  Click="CopyToOtherPane_Click"  InputGestureText="F5"
-                     IsEnabled="{Binding HasSelection}"/>
-            <MenuItem Header="Move to Other Pane"  Click="MoveToOtherPane_Click"  InputGestureText="F6"
-                     IsEnabled="{Binding HasSelection}"/>
-            <MenuItem Header="Go to Other Pane's Folder"  Click="GoToOtherPaneFolder_Click">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FolderSwap" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
+            <MenuItem Header="Search…"       Click="Search_Click"                       InputGestureText="Ctrl+F">
+                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Magnify" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
-            <Separator/>
-            <MenuItem Header="Batch Rename…"  Click="BatchRename_Click"           InputGestureText="Ctrl+M"
-                     IsEnabled="{Binding HasSelection}">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="FormTextbox" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
-            </MenuItem>
-            <Separator/>
-            <MenuItem Header="Filter…"        Command="{Binding ToggleFilterCommand}"    InputGestureText="Ctrl+F">
+            <MenuItem Header="Filter current folder…" Command="{Binding ActivePane.ToggleFilterCommand}">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Filter" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Toggle Preview" Command="{Binding TogglePreviewCommand}"   InputGestureText="F8"/>
+            <MenuItem Header="Toggle preview" Command="{Binding TogglePreviewCommand}"   InputGestureText="F8"/>
             <Separator/>
-            <MenuItem Header="Open Terminal Here"  Command="{Binding OpenTerminalHereCommand}">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Console" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Git History" Click="GitHistory_Click" InputGestureText="Ctrl+G">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="SourceBranch" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Space Radar" Click="SpaceRadar_Click" InputGestureText="Ctrl+Shift+R">
-                <MenuItem.Icon><iconPacks:PackIconMaterial Kind="ChartTree" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Select All"     Command="{Binding SelectAllCommand}"       InputGestureText="Ctrl+A"/>
-            <MenuItem Header="Invert Selection" Command="{Binding InvertSelectionCommand}"/>
+            <MenuItem Header="Select all"     Command="{Binding SelectAllCommand}"       InputGestureText="Ctrl+A"/>
+            <MenuItem Header="Invert selection" Command="{Binding InvertSelectionCommand}"/>
             <Separator/>
-            <MenuItem Header="Add to Favorites" Click="AddToFavorites_Click"
-                     IsEnabled="{Binding HasSelection}">
+            <MenuItem Header="Add to favorites" Click="AddToFavorites_Click" IsEnabled="{Binding HasSelection}">
                 <MenuItem.Icon><iconPacks:PackIconMaterial Kind="Star" Width="12" Height="12" Background="Transparent" Foreground="{DynamicResource TextFg}"/></MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="Properties"     Command="{Binding OpenPropertiesCommand}"  InputGestureText="Alt+Enter">
@@ -371,9 +376,10 @@
     <Grid>
     <DockPanel>
 
-        <!-- ══════════════ BOTTOM: F-KEY TOOLBAR ══════════════ -->
+        <!-- ══════════════ BOTTOM: F-KEY TOOLBAR (Alt-hold overlay) ══════════════ -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource StatusBg}"
-                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0"
+                Visibility="{Binding IsFKeyOverlayVisible, Converter={StaticResource BoolToVisibilityConverter}}">
             <UniformGrid Rows="1" Margin="2,1">
                 <Button Style="{StaticResource FKeyButton}" Click="FKey_Click" Tag="F3">
                     <TextBlock><Run FontWeight="Bold" Foreground="{DynamicResource SubTextFg}" Text="F3 "/><Run Text="View"/></TextBlock>
@@ -496,12 +502,13 @@
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="5"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="{Binding IsDualPane, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=5}"/>
+                        <ColumnDefinition Width="{Binding IsDualPane, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=*}"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- ════ LEFT PANE ════ -->
-                    <Border Grid.Column="0" x:Name="LeftPaneBorder">
+                    <Border Grid.Column="0" x:Name="LeftPaneBorder"
+                            PreviewMouseDown="LeftPaneBorder_PreviewMouseDown">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource PaneContainer}">
                                 <Style.Triggers>
@@ -522,11 +529,21 @@
                                             AutomationProperties.Name="New tab in left pane">
                                         <iconPacks:PackIconMaterial Kind="Plus" Width="10" Height="10"/>
                                     </Button>
-                                    <ItemsControl ItemsSource="{Binding Tabs}" ItemTemplate="{StaticResource PaneTabTemplate}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalScrollBarVisibility="Disabled"
+                                                  PreviewMouseWheel="PaneTabStrip_PreviewMouseWheel">
+                                        <ItemsControl x:Name="LeftTabStrip" Tag="Left"
+                                                      ItemsSource="{Binding Tabs}" ItemTemplate="{StaticResource PaneTabTemplate}"
+                                                      AllowDrop="True"
+                                                      PreviewMouseLeftButtonDown="PaneTabStrip_PreviewMouseLeftButtonDown"
+                                                      PreviewMouseMove="PaneTabStrip_PreviewMouseMove"
+                                                      DragOver="PaneTabStrip_DragOver"
+                                                      Drop="PaneTabStrip_Drop">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </ScrollViewer>
                                 </DockPanel>
                             </Border>
                             <!-- Nav bar -->
@@ -548,7 +565,7 @@
                                         <Button x:Name="LeftViewModeButton" Style="{StaticResource NavButton}" ToolTip="View Mode" Click="LeftViewModeButton_Click" AutomationProperties.Name="View mode">
                                             <iconPacks:PackIconMaterial Kind="ViewList" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding LeftPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter (Ctrl+F)" AutomationProperties.Name="Toggle filter">
+                                        <Button Command="{Binding LeftPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter current folder (loaded items only)" AutomationProperties.Name="Toggle filter">
                                             <iconPacks:PackIconMaterial Kind="Filter" Width="13" Height="13"/>
                                         </Button>
                                         <Button Command="{Binding LeftPane.TogglePreviewCommand}" Style="{StaticResource NavButton}" ToolTip="Preview (F8)" AutomationProperties.Name="Toggle preview pane">
@@ -557,30 +574,15 @@
                                         <Button Command="{Binding LeftPane.NavigateCommand}" Style="{StaticResource NavButton}" ToolTip="Refresh" Margin="4,0,0,0" AutomationProperties.Name="Refresh">
                                             <iconPacks:PackIconMaterial Kind="Refresh" Width="13" Height="13"/>
                                         </Button>
+                                        <Button Command="{Binding ToggleDualPaneCommand}" Style="{StaticResource NavButton}"
+                                                ToolTip="Split / unsplit (Ctrl+\)"
+                                                AutomationProperties.Name="Toggle dual pane">
+                                            <iconPacks:PackIconMaterial Kind="ViewSplitVertical" Width="13" Height="13"/>
+                                        </Button>
                                     </StackPanel>
                                     <ctrl:BreadcrumbBar Path="{Binding LeftPane.CurrentPath, Mode=TwoWay}"
                                                         NavigateCommand="{Binding LeftPane.GoToPathCommand}"
                                                         VerticalAlignment="Center"/>
-                                </DockPanel>
-                            </Border>
-                            <!-- Filter bar (collapsible) -->
-                            <Border DockPanel.Dock="Top"
-                                    Visibility="{Binding LeftPane.IsFilterVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Background="{DynamicResource TreeBg}" Padding="6,3"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-                                <DockPanel>
-                                    <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify" Width="12" Height="12"
-                                                                Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <Button DockPanel.Dock="Right" Command="{Binding LeftPane.ClearFilterCommand}"
-                                            Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter"
-                                            AutomationProperties.Name="Clear filter">
-                                        <iconPacks:PackIconMaterial Kind="Close" Width="9" Height="9"/>
-                                    </Button>
-                                    <TextBox x:Name="LeftFilterBox"
-                                             Text="{Binding LeftPane.FilterText, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="Transparent" BorderThickness="0"
-                                             FontFamily="Cascadia Code,Consolas" FontSize="12"
-                                             VerticalContentAlignment="Center"/>
                                 </DockPanel>
                             </Border>
                             <!-- Status bar -->
@@ -591,9 +593,14 @@
                             </Border>
                             <!-- File list + preview split -->
                             <Grid>
+                                <Grid.Resources>
+                                    <conv:BindingProxy x:Key="LeftDcProxy" Data="{Binding}"/>
+                                </Grid.Resources>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="{Binding Data.LeftPane.ShowPreview, Source={StaticResource LeftDcProxy}, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=4}"/>
+                                    <ColumnDefinition Width="{Binding Data.LeftPane.ShowPreview, Source={StaticResource LeftDcProxy}, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=320}"
+                                                      MinWidth="{Binding Data.LeftPane.ShowPreview, Source={StaticResource LeftDcProxy}, Converter={StaticResource BoolToDoubleConverter}, ConverterParameter=200}"/>
                                 </Grid.ColumnDefinitions>
                                 <ListView x:Name="LeftList" Grid.Column="0"
                                           Visibility="{Binding LeftPane.ViewMode, Converter={StaticResource ViewModeToVisibilityConverter}, ConverterParameter=Details}"
@@ -633,8 +640,9 @@
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <Grid>
-                                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"
-                                                                       Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                                            <StackPanel Orientation="Vertical"
+                                                                        Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
                                                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -655,6 +663,12 @@
                                                                     </Style>
                                                                 </TextBlock.Style>
                                                             </TextBlock>
+                                                            <TextBlock Text="{Binding RelativeSubPath}" FontSize="10"
+                                                                       Foreground="{DynamicResource SubTextFg}"
+                                                                       TextTrimming="CharacterEllipsis" Margin="0,-2,0,0"
+                                                                       ToolTip="{Binding FullPath}"
+                                                                       Visibility="{Binding HasRelativeSubPath, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                        </StackPanel>
                                                             <TextBox Text="{Binding EditingName, UpdateSourceTrigger=PropertyChanged}"
                                                                      Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"
                                                                      Background="{DynamicResource HeaderBg}" Foreground="{DynamicResource TextFg}" CaretBrush="{DynamicResource AccentBrush}"
@@ -743,12 +757,59 @@
                                     </ListBox.Style>
                                 </ListBox>
                                 <!-- Preview pane (left) -->
-                                <Border Grid.Column="1" Width="200"
-                                        Visibility="{Binding LeftPane.IsPreviewVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Background="{DynamicResource TreeBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <StackPanel x:Name="LeftPreviewPanel" Margin="8"/>
-                                    </ScrollViewer>
+                                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                              Visibility="{Binding LeftPane.ShowPreview, Converter={StaticResource BoolToVisibilityConverter}}"
+                                              Background="{DynamicResource BorderBrush}"/>
+                                <Border Grid.Column="2"
+                                        Visibility="{Binding LeftPane.ShowPreview, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Background="{DynamicResource TreeBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0">
+                                    <DockPanel>
+                                        <!-- Quick-action row at the bottom of the drawer -->
+                                        <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0" Padding="6,4">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Reveal" Click="PreviewReveal_Click" Tag="Left"
+                                                        Style="{StaticResource NavButton}" Width="Auto" Padding="8,3"
+                                                        ToolTip="Reveal in Windows Explorer"
+                                                        AutomationProperties.Name="Reveal in Windows Explorer"/>
+                                                <Button Content="Properties" Click="PreviewProperties_Click" Tag="Left"
+                                                        Style="{StaticResource NavButton}" Width="Auto" Padding="8,3" Margin="4,0,0,0"
+                                                        ToolTip="Show native Windows properties dialog"
+                                                        AutomationProperties.Name="Open native properties"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                            <StackPanel x:Name="LeftPreviewPanel" Margin="10"/>
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- Floating filter overlay (left) — anchored top-right of the file list,
+                                     does not reflow content; click outside / Esc to dismiss. -->
+                                <Border Grid.Column="0" Tag="{Binding LeftPane}"
+                                        Visibility="{Binding LeftPane.IsFilterVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Margin="0,8,12,0" Padding="8,5"
+                                        Background="{DynamicResource HeaderBg}"
+                                        BorderBrush="{DynamicResource AccentBrush}"
+                                        BorderThickness="1" CornerRadius="4"
+                                        Effect="{StaticResource DialogShadow}">
+                                    <DockPanel MinWidth="260">
+                                        <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify" Width="12" Height="12"
+                                                                    Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <Button DockPanel.Dock="Right" Command="{Binding LeftPane.ClearFilterCommand}"
+                                                Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter (Esc)"
+                                                AutomationProperties.Name="Clear filter">
+                                            <iconPacks:PackIconMaterial Kind="Close" Width="9" Height="9"/>
+                                        </Button>
+                                        <TextBox x:Name="LeftFilterBox"
+                                                 Text="{Binding LeftPane.FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="Transparent" BorderThickness="0"
+                                                 FontFamily="Cascadia Code,Consolas" FontSize="12"
+                                                 VerticalContentAlignment="Center"
+                                                 IsVisibleChanged="FilterBox_IsVisibleChanged"
+                                                 PreviewKeyDown="FilterBox_PreviewKeyDown"/>
+                                    </DockPanel>
                                 </Border>
                             </Grid>
                         </DockPanel>
@@ -757,7 +818,8 @@
                     <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
                     <!-- ════ RIGHT PANE ════ -->
-                    <Border Grid.Column="2">
+                    <Border Grid.Column="2" x:Name="RightPaneBorder"
+                            PreviewMouseDown="RightPaneBorder_PreviewMouseDown">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource PaneContainer}">
                                 <Style.Triggers>
@@ -778,11 +840,21 @@
                                             AutomationProperties.Name="New tab in right pane">
                                         <iconPacks:PackIconMaterial Kind="Plus" Width="10" Height="10"/>
                                     </Button>
-                                    <ItemsControl ItemsSource="{Binding Tabs}" ItemTemplate="{StaticResource PaneTabTemplate}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalScrollBarVisibility="Disabled"
+                                                  PreviewMouseWheel="PaneTabStrip_PreviewMouseWheel">
+                                        <ItemsControl x:Name="RightTabStrip" Tag="Right"
+                                                      ItemsSource="{Binding Tabs}" ItemTemplate="{StaticResource PaneTabTemplate}"
+                                                      AllowDrop="True"
+                                                      PreviewMouseLeftButtonDown="PaneTabStrip_PreviewMouseLeftButtonDown"
+                                                      PreviewMouseMove="PaneTabStrip_PreviewMouseMove"
+                                                      DragOver="PaneTabStrip_DragOver"
+                                                      Drop="PaneTabStrip_Drop">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </ScrollViewer>
                                 </DockPanel>
                             </Border>
                             <!-- Nav bar -->
@@ -804,7 +876,7 @@
                                         <Button x:Name="RightViewModeButton" Style="{StaticResource NavButton}" ToolTip="View Mode" Click="RightViewModeButton_Click" AutomationProperties.Name="View mode">
                                             <iconPacks:PackIconMaterial Kind="ViewList" Width="13" Height="13"/>
                                         </Button>
-                                        <Button Command="{Binding RightPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter (Ctrl+F)" AutomationProperties.Name="Toggle filter">
+                                        <Button Command="{Binding RightPane.ToggleFilterCommand}" Style="{StaticResource NavButton}" ToolTip="Filter current folder (loaded items only)" AutomationProperties.Name="Toggle filter">
                                             <iconPacks:PackIconMaterial Kind="Filter" Width="13" Height="13"/>
                                         </Button>
                                         <Button Command="{Binding RightPane.TogglePreviewCommand}" Style="{StaticResource NavButton}" ToolTip="Preview (F8)" AutomationProperties.Name="Toggle preview pane">
@@ -819,26 +891,6 @@
                                                         VerticalAlignment="Center"/>
                                 </DockPanel>
                             </Border>
-                            <!-- Filter bar -->
-                            <Border DockPanel.Dock="Top"
-                                    Visibility="{Binding RightPane.IsFilterVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Background="{DynamicResource TreeBg}" Padding="6,3"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-                                <DockPanel>
-                                    <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify" Width="12" Height="12"
-                                                                Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <Button DockPanel.Dock="Right" Command="{Binding RightPane.ClearFilterCommand}"
-                                            Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter"
-                                            AutomationProperties.Name="Clear filter">
-                                        <iconPacks:PackIconMaterial Kind="Close" Width="9" Height="9"/>
-                                    </Button>
-                                    <TextBox x:Name="RightFilterBox"
-                                             Text="{Binding RightPane.FilterText, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="Transparent" BorderThickness="0"
-                                             FontFamily="Cascadia Code,Consolas" FontSize="12"
-                                             VerticalContentAlignment="Center"/>
-                                </DockPanel>
-                            </Border>
                             <!-- Status bar -->
                             <Border DockPanel.Dock="Bottom" Background="{DynamicResource StatusBg}"
                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="8,3">
@@ -847,9 +899,14 @@
                             </Border>
                             <!-- File list + preview -->
                             <Grid>
+                                <Grid.Resources>
+                                    <conv:BindingProxy x:Key="RightDcProxy" Data="{Binding}"/>
+                                </Grid.Resources>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="{Binding Data.RightPane.ShowPreview, Source={StaticResource RightDcProxy}, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=4}"/>
+                                    <ColumnDefinition Width="{Binding Data.RightPane.ShowPreview, Source={StaticResource RightDcProxy}, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=320}"
+                                                      MinWidth="{Binding Data.RightPane.ShowPreview, Source={StaticResource RightDcProxy}, Converter={StaticResource BoolToDoubleConverter}, ConverterParameter=200}"/>
                                 </Grid.ColumnDefinitions>
                                 <ListView x:Name="RightList" Grid.Column="0"
                                           Visibility="{Binding RightPane.ViewMode, Converter={StaticResource ViewModeToVisibilityConverter}, ConverterParameter=Details}"
@@ -889,8 +946,9 @@
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <Grid>
-                                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"
-                                                                       Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                                            <StackPanel Orientation="Vertical"
+                                                                        Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
                                                                         <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
@@ -911,6 +969,12 @@
                                                                     </Style>
                                                                 </TextBlock.Style>
                                                             </TextBlock>
+                                                            <TextBlock Text="{Binding RelativeSubPath}" FontSize="10"
+                                                                       Foreground="{DynamicResource SubTextFg}"
+                                                                       TextTrimming="CharacterEllipsis" Margin="0,-2,0,0"
+                                                                       ToolTip="{Binding FullPath}"
+                                                                       Visibility="{Binding HasRelativeSubPath, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                        </StackPanel>
                                                             <TextBox Text="{Binding EditingName, UpdateSourceTrigger=PropertyChanged}"
                                                                      Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"
                                                                      Background="{DynamicResource HeaderBg}" Foreground="{DynamicResource TextFg}" CaretBrush="{DynamicResource AccentBrush}"
@@ -999,12 +1063,57 @@
                                     </ListBox.Style>
                                 </ListBox>
                                 <!-- Preview pane (right) -->
-                                <Border Grid.Column="1" Width="200"
-                                        Visibility="{Binding RightPane.IsPreviewVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Background="{DynamicResource TreeBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <StackPanel x:Name="RightPreviewPanel" Margin="8"/>
-                                    </ScrollViewer>
+                                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                              Visibility="{Binding RightPane.ShowPreview, Converter={StaticResource BoolToVisibilityConverter}}"
+                                              Background="{DynamicResource BorderBrush}"/>
+                                <Border Grid.Column="2"
+                                        Visibility="{Binding RightPane.ShowPreview, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Background="{DynamicResource TreeBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0">
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0" Padding="6,4">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Reveal" Click="PreviewReveal_Click" Tag="Right"
+                                                        Style="{StaticResource NavButton}" Width="Auto" Padding="8,3"
+                                                        ToolTip="Reveal in Windows Explorer"
+                                                        AutomationProperties.Name="Reveal in Windows Explorer"/>
+                                                <Button Content="Properties" Click="PreviewProperties_Click" Tag="Right"
+                                                        Style="{StaticResource NavButton}" Width="Auto" Padding="8,3" Margin="4,0,0,0"
+                                                        ToolTip="Show native Windows properties dialog"
+                                                        AutomationProperties.Name="Open native properties"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                            <StackPanel x:Name="RightPreviewPanel" Margin="10"/>
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- Floating filter overlay (right) -->
+                                <Border Grid.Column="0" Tag="{Binding RightPane}"
+                                        Visibility="{Binding RightPane.IsFilterVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Margin="0,8,12,0" Padding="8,5"
+                                        Background="{DynamicResource HeaderBg}"
+                                        BorderBrush="{DynamicResource AccentBrush}"
+                                        BorderThickness="1" CornerRadius="4"
+                                        Effect="{StaticResource DialogShadow}">
+                                    <DockPanel MinWidth="260">
+                                        <iconPacks:PackIconMaterial DockPanel.Dock="Left" Kind="Magnify" Width="12" Height="12"
+                                                                    Foreground="{DynamicResource SubTextFg}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <Button DockPanel.Dock="Right" Command="{Binding RightPane.ClearFilterCommand}"
+                                                Style="{StaticResource NavButton}" Width="20" Height="20" ToolTip="Clear filter (Esc)"
+                                                AutomationProperties.Name="Clear filter">
+                                            <iconPacks:PackIconMaterial Kind="Close" Width="9" Height="9"/>
+                                        </Button>
+                                        <TextBox x:Name="RightFilterBox"
+                                                 Text="{Binding RightPane.FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="Transparent" BorderThickness="0"
+                                                 FontFamily="Cascadia Code,Consolas" FontSize="12"
+                                                 VerticalContentAlignment="Center"
+                                                 IsVisibleChanged="FilterBox_IsVisibleChanged"
+                                                 PreviewKeyDown="FilterBox_PreviewKeyDown"/>
+                                    </DockPanel>
                                 </Border>
                             </Grid>
                         </DockPanel>

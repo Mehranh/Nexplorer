@@ -129,7 +129,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private AppTheme _theme;
     [ObservableProperty] private string   _accentColor = "#0078D4";
     [ObservableProperty] private bool     _compactDensityMode;
+    [ObservableProperty] private Density  _density;
     [ObservableProperty] private bool     _showPreviewPane;
+    [ObservableProperty] private bool     _showSecondPane;
     [ObservableProperty] private bool     _showFolderTree;
     [ObservableProperty] private bool     _enableAnimations;
     [ObservableProperty] private string   _commandLineFontFamily = "Cascadia Mono";
@@ -304,7 +306,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         Theme                  = s.Appearance.Theme;
         AccentColor            = s.Appearance.AccentColor;
         CompactDensityMode     = s.Appearance.CompactDensityMode;
+        Density                = s.Appearance.Density;
         ShowPreviewPane        = s.Appearance.ShowPreviewPane;
+        ShowSecondPane         = s.Appearance.ShowSecondPane;
         ShowFolderTree         = s.Appearance.ShowFolderTree;
         EnableAnimations       = s.Appearance.EnableAnimations;
         CommandLineFontFamily  = s.Appearance.CommandLineFontFamily;
@@ -367,7 +371,9 @@ public sealed partial class SettingsViewModel : ObservableObject
                 Theme                 = Theme,
                 AccentColor           = AccentColor,
                 CompactDensityMode    = CompactDensityMode,
+                Density               = Density,
                 ShowPreviewPane       = ShowPreviewPane,
+                ShowSecondPane        = ShowSecondPane,
                 ShowFolderTree        = ShowFolderTree,
                 EnableAnimations      = EnableAnimations,
                 CommandLineFontFamily = CommandLineFontFamily,

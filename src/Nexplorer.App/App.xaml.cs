@@ -15,10 +15,32 @@ public partial class App : Application
         base.OnStartup(e);
         await SettingsService.LoadAsync();
         ApplyTheme(SettingsService.Current.Appearance.Theme);
-        SettingsService.SettingsChanged += s => Dispatcher.Invoke(() => ApplyTheme(s.Appearance.Theme));
+        ApplyDensity(SettingsService.Current.Appearance.Density);
+        SettingsService.SettingsChanged += s => Dispatcher.Invoke(() =>
+        {
+            ApplyTheme(s.Appearance.Theme);
+            ApplyDensity(s.Appearance.Density);
+        });
 
         // Check for updates in background after the window is shown
         _ = CheckForUpdateAsync();
+    }
+
+    /// <summary>
+    /// Map the user's <see cref="Density"/> choice to the
+    /// <c>RowHeight</c> / <c>RowFontSize</c> dynamic resources consumed by the
+    /// file-list <c>ListViewItem</c> style.
+    /// </summary>
+    internal static void ApplyDensity(Density density)
+    {
+        var (height, font) = density switch
+        {
+            Density.Compact     => (22.0, 12.0),
+            Density.Spacious    => (38.0, 14.0),
+            _                   => (28.0, 13.0), // Comfortable
+        };
+        Current.Resources["RowHeight"]   = height;
+        Current.Resources["RowFontSize"] = font;
     }
 
     private static async Task CheckForUpdateAsync()

@@ -68,7 +68,11 @@ public sealed partial class PaneViewModel : ObservableObject, IDisposable
     /// <summary>True when at least one item is selected.</summary>
     public bool HasSelection => SelectedItem is not null || _selectedItems.Count > 0;
 
-    partial void OnSelectedItemChanged(FileItemViewModel? value) => NotifySelectionCommands();
+    partial void OnSelectedItemChanged(FileItemViewModel? value)
+    {
+        NotifySelectionCommands();
+        OnPropertyChanged(nameof(ShowPreview));
+    }
 
     private void NotifySelectionCommands()
     {
@@ -97,23 +101,162 @@ public sealed partial class PaneViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool   _sortDescending = false;
 
     // ─── Quick Filter ─────────────────────────────────────────────────────────
+    //
+    // The filter bar serves two purposes:
+    //   1. Filter the items already loaded from the current folder (instant).
+    //   2. Stream additional matches from nested subdirectories via
+    //      <see cref="SearchService"/>, so the user can find a file anywhere
+    //      under the current path without opening the full Search dialog.
+    //
+    // The deep-search half is debounced (so each keystroke doesn't spawn
+    // a fresh enumeration) and cancellation-cascaded (re-typing immediately
+    // aborts the previous walk). Items injected from subfolders carry a
+    // non-empty <see cref="FileItemViewModel.RelativeSubPath"/> so the cell
+    // template can render a small "in subfolder/path" subtitle.
 
     [ObservableProperty] private string  _filterText    = string.Empty;
     [ObservableProperty] private bool    _isFilterVisible;
 
+    private CancellationTokenSource? _filterCts;
+    private readonly List<FileItemViewModel> _deepFilterItems = new();
+    private System.Threading.Timer? _filterDebounce;
+    private const int FilterDebounceMs = 200;
+
     partial void OnFilterTextChanged(string value)
     {
+        // Always re-apply the in-memory predicate immediately for instant
+        // feedback on currently-loaded items.
         ItemsView.Filter = string.IsNullOrWhiteSpace(value)
             ? null
             : obj => obj is FileItemViewModel item
                   && item.Name.Contains(value, StringComparison.OrdinalIgnoreCase);
         ItemsView.Refresh();
+        UpdateFilterStatus();
+
+        // Cancel any in-flight deep search and remove its prior contributions.
+        CancelAndClearDeepFilter();
+
+        if (string.IsNullOrWhiteSpace(value)) return;
+
+        // Debounce: only kick off a recursive walk if the text holds steady.
+        // Captured snapshot avoids races when the user keeps typing.
+        var snapshot = value;
+        var rootPath = CurrentPath;
+        _filterDebounce?.Dispose();
+        _filterDebounce = new System.Threading.Timer(_ =>
+        {
+            // Bail if the user has changed the text or navigated since.
+            if (FilterText != snapshot || CurrentPath != rootPath) return;
+            Application.Current.Dispatcher.BeginInvoke(new Action(
+                () => StartDeepFilter(snapshot, rootPath)));
+        }, null, FilterDebounceMs, Timeout.Infinite);
+    }
+
+    private void UpdateFilterStatus()
+    {
         var total   = Items.Count;
         var visible = ItemsView.Cast<object>().Count();
-        if (!string.IsNullOrWhiteSpace(value))
+        if (!string.IsNullOrWhiteSpace(FilterText))
             StatusText = $"{visible:n0} of {total:n0} items (filtered)";
         else
             StatusText = $"{total:n0} {(total == 1 ? "item" : "items")}";
+    }
+
+    private void CancelAndClearDeepFilter()
+    {
+        _filterCts?.Cancel();
+        _filterCts?.Dispose();
+        _filterCts = null;
+
+        if (_deepFilterItems.Count > 0)
+        {
+            // Remove any items we previously injected from subdirectories.
+            // Done in a single pass so RangeObservableCollection only fires
+            // one CollectionChanged.
+            var toRemove = _deepFilterItems.ToArray();
+            _deepFilterItems.Clear();
+            foreach (var it in toRemove)
+                Items.Remove(it);
+        }
+    }
+
+    private void StartDeepFilter(string query, string rootPath)
+    {
+        if (string.IsNullOrWhiteSpace(rootPath) || !Directory.Exists(rootPath)) return;
+        if (FilterText != query || CurrentPath != rootPath) return;
+
+        _filterCts = new CancellationTokenSource();
+        var token = _filterCts.Token;
+
+        var criteria = new SearchCriteria
+        {
+            Query     = query,
+            RootPath  = rootPath,
+            Recursive = true,
+        };
+
+        // Pre-build a hash of the names already loaded in this folder so we
+        // never inject a duplicate of an item the user is already seeing.
+        var existing = new HashSet<string>(
+            Items.Select(i => i.FullPath),
+            StringComparer.OrdinalIgnoreCase);
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var batch = new List<FileItemViewModel>(64);
+                await foreach (var fi in SearchService.SearchAsync(criteria, token))
+                {
+                    token.ThrowIfCancellationRequested();
+                    if (existing.Contains(fi.FullName)) continue;
+
+                    var rel = Path.GetRelativePath(rootPath, fi.DirectoryName ?? rootPath);
+                    if (rel == "." || string.IsNullOrEmpty(rel)) continue; // same folder, skip
+
+                    var item = new FileItemViewModel(new FileItem
+                    {
+                        FullPath        = fi.FullName,
+                        Name            = fi.Name,
+                        IsDirectory     = fi.Attributes.HasFlag(FileAttributes.Directory),
+                        SizeBytes       = fi.Attributes.HasFlag(FileAttributes.Directory) ? null : (long?)fi.Length,
+                        LastWriteTimeUtc = fi.LastWriteTimeUtc,
+                        Extension       = fi.Extension,
+                    })
+                    {
+                        RelativeSubPath = "in " + rel.Replace('\\', '/'),
+                    };
+                    batch.Add(item);
+
+                    if (batch.Count >= 64)
+                    {
+                        var snapshot = batch.ToArray();
+                        batch.Clear();
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            if (token.IsCancellationRequested) return;
+                            _deepFilterItems.AddRange(snapshot);
+                            Items.AddRange(snapshot);
+                            UpdateFilterStatus();
+                        });
+                    }
+                }
+
+                if (batch.Count > 0)
+                {
+                    var snapshot = batch.ToArray();
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (token.IsCancellationRequested) return;
+                        _deepFilterItems.AddRange(snapshot);
+                        Items.AddRange(snapshot);
+                        UpdateFilterStatus();
+                    });
+                }
+            }
+            catch (OperationCanceledException) { /* expected */ }
+            catch { /* swallow — filter is best-effort */ }
+        }, token);
     }
 
     [RelayCommand]
@@ -135,7 +278,16 @@ public sealed partial class PaneViewModel : ObservableObject, IDisposable
 
     // ─── Preview pane toggle ──────────────────────────────────────────────────
 
-    [ObservableProperty] private bool _isPreviewVisible;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPreview))]
+    private bool _isPreviewVisible;
+
+    /// <summary>
+    /// True when the preview drawer should actually render. The user's intent
+    /// (<see cref="IsPreviewVisible"/>) is preserved across selection changes,
+    /// but we hide the empty "No selection" state when nothing is selected.
+    /// </summary>
+    public bool ShowPreview => IsPreviewVisible && SelectedItem is not null;
 
     [RelayCommand]
     private void TogglePreview() => IsPreviewVisible = !IsPreviewVisible;
@@ -286,6 +438,9 @@ public sealed partial class PaneViewModel : ObservableObject, IDisposable
         _navigateCts?.Cancel();
         _navigateCts = new CancellationTokenSource();
         var token = _navigateCts.Token;
+
+        // Any in-flight deep filter belongs to the previous folder; abort.
+        CancelAndClearDeepFilter();
 
         StatusText = "Loading…";
         Items.Clear();
@@ -586,6 +741,9 @@ public sealed partial class PaneViewModel : ObservableObject, IDisposable
     {
         _navigateCts?.Cancel();
         _navigateCts?.Dispose();
+        _filterCts?.Cancel();
+        _filterCts?.Dispose();
+        _filterDebounce?.Dispose();
         _refreshTimer?.Dispose();
         StopWatcher();
     }

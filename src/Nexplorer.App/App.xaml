@@ -14,6 +14,8 @@
             <conv:SuggestionKindColorConverter        x:Key="SuggestionKindColorConverter" />
             <conv:BoolToVisibilityConverter           x:Key="BoolToVisibilityConverter" />
             <conv:InverseBoolToVisibilityConverter    x:Key="InverseBoolToVisibilityConverter" />
+            <conv:BoolToGridLengthConverter           x:Key="BoolToGridLengthConverter" />
+            <conv:BoolToDoubleConverter               x:Key="BoolToDoubleConverter" />
             <conv:TabActiveBrushConverter             x:Key="TabActiveBrushConverter" />
             <conv:SplitActiveToVisibilityConverter    x:Key="SplitActiveToVisibilityConverter" />
             <conv:SplitOrientationConverter           x:Key="SplitOrientationConverter" />
@@ -30,6 +32,10 @@
             <!-- ── Shared effects ────────────────────────────────────────── -->
             <DropShadowEffect x:Key="DialogShadow" BlurRadius="24" ShadowDepth="4"
                               Opacity="0.5" Color="Black" Direction="270"/>
+
+            <!-- ── Density-driven row metrics (overridden at runtime) ─────── -->
+            <sys:Double x:Key="RowHeight"   xmlns:sys="clr-namespace:System;assembly=mscorlib">28</sys:Double>
+            <sys:Double x:Key="RowFontSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">13</sys:Double>
 
             <!-- ── Colour palette ─────────────────────────────────────────── -->
             <SolidColorBrush x:Key="AppBg"          Color="#1C1C1C"/>
@@ -328,6 +334,8 @@
                 <Setter Property="VerticalContentAlignment"   Value="Center"/>
                 <Setter Property="Background"                 Value="Transparent"/>
                 <Setter Property="Padding"                    Value="2,1"/>
+                <Setter Property="Height"                     Value="{DynamicResource RowHeight}"/>
+                <Setter Property="FontSize"                   Value="{DynamicResource RowFontSize}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ListViewItem">

@@ -81,6 +81,8 @@ public static class SearchService
         // ---- Hoist filter state to locals (avoids Nullable<T> branches in hot loop) --------
         var query     = criteria.Query ?? string.Empty;
         var hasQuery  = query.Length > 0;
+        var isGlob    = !criteria.UseRegex && hasQuery &&
+                        (query.Contains('*') || query.Contains('?'));
         var hasMin    = criteria.MinSize.HasValue;
         var hasMax    = criteria.MaxSize.HasValue;
         var minVal    = criteria.MinSize.GetValueOrDefault();
@@ -121,6 +123,7 @@ public static class SearchService
 
             if (localRegex is not null) return localRegex.IsMatch(e.FileName);
             if (!hasQuery)              return true;
+            if (isGlob)                 return FileSystemName.MatchesSimpleExpression(query, e.FileName, ignoreCase: true);
             return e.FileName.Contains(query, StringComparison.OrdinalIgnoreCase);
         };
 
@@ -131,6 +134,7 @@ public static class SearchService
         {
             if (localRegex is not null) return localRegex.IsMatch(name);
             if (!hasQuery)              return true;
+            if (isGlob)                 return FileSystemName.MatchesSimpleExpression(query, name, ignoreCase: true);
             return name.Contains(query, StringComparison.OrdinalIgnoreCase);
         }
 

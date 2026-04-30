@@ -180,6 +180,17 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Activate the left pane on any mouse click inside its border (tab strip, breadcrumb,
+    /// status bar, preview drawer, etc.) so subsequent folder-tree navigation targets it.
+    /// </summary>
+    private void LeftPaneBorder_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        => Vm.ActivateLeftPaneCommand.Execute(null);
+
+    /// <summary>Same for the right pane.</summary>
+    private void RightPaneBorder_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        => Vm.ActivateRightPaneCommand.Execute(null);
+
+    /// <summary>
     /// If no item is selected, selects the first item so Up/Down keys work immediately.
     /// </summary>
     private static void EnsureListItemFocused(ListView list)
@@ -753,6 +764,9 @@ public partial class MainWindow : Window
 
     private void SpaceRadar_Click(object sender, RoutedEventArgs e) => OpenSpaceRadar();
 
+    // Menu wrapper for the deep-search dialog (Ctrl+F).
+    private void Search_Click(object sender, RoutedEventArgs e) => OpenSearch();
+
     private void OpenSpaceRadar()
     {
         var path = Vm.ActivePane.CurrentPath;
@@ -817,20 +831,26 @@ public partial class MainWindow : Window
         {
             try
             {
+                // Decode at a generous size so the image stays sharp when the user
+                // widens the preview drawer; WPF will downscale on draw.
+                // 720 px covers the typical drawer width range (200–600 px) without
+                // burning RAM for huge originals.
                 var bi = new BitmapImage();
                 bi.BeginInit();
                 bi.UriSource         = new Uri(item.FullPath);
-                bi.DecodePixelWidth  = 180;
+                bi.DecodePixelWidth  = 720;
                 bi.CacheOption       = BitmapCacheOption.OnLoad;
                 bi.EndInit();
                 bi.Freeze();
 
                 panel.Children.Add(new Image
                 {
-                    Source  = bi,
-                    MaxWidth = 180,
-                    Margin   = new Thickness(0, 8, 0, 4),
-                    Stretch  = Stretch.Uniform,
+                    Source              = bi,
+                    Stretch             = Stretch.Uniform,
+                    StretchDirection    = StretchDirection.DownOnly, // never upscale tiny icons
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    MaxHeight           = 480,
+                    Margin              = new Thickness(0, 8, 0, 4),
                 });
 
                 panel.Children.Add(MakeInfoLine("Dimensions", $"{bi.PixelWidth} × {bi.PixelHeight}"));
@@ -1009,6 +1029,74 @@ public partial class MainWindow : Window
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+    //  FLOATING FILTER OVERLAY
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// <summary>Focus the filter textbox when its parent overlay becomes visible.</summary>
+    private void FilterBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (sender is TextBox tb && (bool)e.NewValue)
+        {
+            tb.Dispatcher.BeginInvoke(
+                () => { tb.Focus(); tb.SelectAll(); },
+                System.Windows.Threading.DispatcherPriority.Input);
+        }
+    }
+
+    /// <summary>Esc closes the filter; Enter commits and returns focus to the file list.</summary>
+    private void FilterBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox tb) return;
+
+        // The textbox is named LeftFilterBox / RightFilterBox; pick the matching pane.
+        var pane = tb.Name == "LeftFilterBox" ? Vm.LeftPane : Vm.RightPane;
+        var list = tb.Name == "LeftFilterBox" ? (System.Windows.Controls.Primitives.Selector)LeftList : RightList;
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                e.Handled = true;
+                pane.ClearFilterCommand.Execute(null);
+                if (pane.IsFilterVisible) pane.ToggleFilterCommand.Execute(null);
+                list.Focus();
+                break;
+            case Key.Return:
+                e.Handled = true;
+                list.Focus();
+                break;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  PREVIEW DRAWER — quick-action buttons
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// <summary>"Reveal" — open the selected item's parent in Windows Explorer with it pre-selected.</summary>
+    private void PreviewReveal_Click(object sender, RoutedEventArgs e)
+    {
+        var pane = (sender as FrameworkElement)?.Tag as string == "Right" ? Vm.RightPane : Vm.LeftPane;
+        var target = pane.SelectedItem?.FullPath ?? pane.CurrentPath;
+        if (string.IsNullOrEmpty(target)) return;
+
+        // /select, focuses the file in its parent folder; for folders, just open them.
+        try
+        {
+            if (System.IO.Directory.Exists(target))
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(target) { UseShellExecute = true });
+            else
+                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{target}\"");
+        }
+        catch { /* swallow — Reveal is best-effort */ }
+    }
+
+    /// <summary>"Properties" — invoke the native Windows property sheet.</summary>
+    private void PreviewProperties_Click(object sender, RoutedEventArgs e)
+    {
+        var pane = (sender as FrameworkElement)?.Tag as string == "Right" ? Vm.RightPane : Vm.LeftPane;
+        pane.OpenPropertiesCommand.Execute(null);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  TAB STRIP
     // ═══════════════════════════════════════════════════════════════════════
 
@@ -1032,6 +1120,89 @@ public partial class MainWindow : Window
     {
         if (Vm.LeftTabs.Tabs.Contains(tab))  return Vm.LeftTabs;
         if (Vm.RightTabs.Tabs.Contains(tab)) return Vm.RightTabs;
+        return null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  TAB STRIP — drag-to-reorder + horizontal mouse-wheel scroll
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private Point   _tabDragStart;
+    private PaneTabViewModel? _tabDragSource;
+
+    private void PaneTabStrip_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _tabDragStart  = e.GetPosition((IInputElement)sender);
+        _tabDragSource = FindTabUnder(e.OriginalSource as DependencyObject);
+    }
+
+    private void PaneTabStrip_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || _tabDragSource is null) return;
+
+        var p  = e.GetPosition((IInputElement)sender);
+        var dx = Math.Abs(p.X - _tabDragStart.X);
+        var dy = Math.Abs(p.Y - _tabDragStart.Y);
+        if (dx < SystemParameters.MinimumHorizontalDragDistance &&
+            dy < SystemParameters.MinimumVerticalDragDistance)
+            return;
+
+        // Hand the tab off to WPF's drag system. Effects.Move so cursor shows the move glyph.
+        DragDrop.DoDragDrop((DependencyObject)sender, _tabDragSource, DragDropEffects.Move);
+        _tabDragSource = null;
+    }
+
+    private void PaneTabStrip_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(typeof(PaneTabViewModel)) ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void PaneTabStrip_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetData(typeof(PaneTabViewModel)) is not PaneTabViewModel src) return;
+        var owner = GetTabsOwnerOf(src);
+        if (owner is null) return;
+
+        // Cross-strip drop is not supported — only reorder within the same pane.
+        if (sender is ItemsControl ic && ic.Tag is string tag)
+        {
+            var expected = tag == "Left" ? Vm.LeftTabs : Vm.RightTabs;
+            if (!ReferenceEquals(owner, expected)) return;
+        }
+
+        // Find the tab the user dropped onto; insert before/after based on cursor X.
+        var target = FindTabUnder(e.OriginalSource as DependencyObject);
+        if (target is null || ReferenceEquals(target, src))
+        {
+            owner.MoveTab(src, owner.Tabs.Count - 1);
+        }
+        else
+        {
+            var newIndex = owner.Tabs.IndexOf(target);
+            owner.MoveTab(src, newIndex);
+        }
+        e.Handled = true;
+    }
+
+    /// <summary>Mouse wheel over the tab strip scrolls horizontally instead of vertically.</summary>
+    private void PaneTabStrip_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is not ScrollViewer sv) return;
+        sv.ScrollToHorizontalOffset(sv.HorizontalOffset - e.Delta);
+        e.Handled = true;
+    }
+
+    private static PaneTabViewModel? FindTabUnder(DependencyObject? source)
+    {
+        // Walk up from the click origin until we hit a FrameworkElement whose
+        // DataContext is a PaneTabViewModel — that's our tab.
+        while (source is not null)
+        {
+            if (source is FrameworkElement fe && fe.DataContext is PaneTabViewModel tab)
+                return tab;
+            source = System.Windows.Media.VisualTreeHelper.GetParent(source);
+        }
         return null;
     }
 
@@ -1253,6 +1424,13 @@ public partial class MainWindow : Window
     {
         base.OnPreviewKeyDown(e);
 
+        // ── F-key cheatsheet overlay: visible while Alt is held ──
+        if (e.Key == Key.System && (e.SystemKey == Key.LeftAlt || e.SystemKey == Key.RightAlt))
+        {
+            Vm.IsFKeyOverlayVisible = true;
+            // Don't mark handled — Alt still needs to drive menu access keys.
+        }
+
         // ── Command Palette (Ctrl+Shift+P) ──
         if (e.Key == Key.P && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
         {
@@ -1260,6 +1438,14 @@ public partial class MainWindow : Window
                 Vm.CommandPalette.Close();
             else
                 OpenCommandPalette();
+            e.Handled = true;
+            return;
+        }
+
+        // ── Toggle dual-pane (Ctrl+\) — VS Code editor-group convention ──
+        if (e.Key == Key.OemBackslash && Keyboard.Modifiers == ModifierKeys.Control && !IsTextInputFocused())
+        {
+            Vm.ToggleDualPaneCommand.Execute(null);
             e.Handled = true;
             return;
         }
@@ -1276,8 +1462,10 @@ public partial class MainWindow : Window
         if (Vm.CommandPalette.IsOpen)
             return;
 
-        // Tab switches between left and right file panes (standard dual-pane behavior)
-        if (e.Key == Key.Tab && !IsTextInputFocused())
+        // Tab switches between left and right file panes (standard dual-pane behavior).
+        // In single-pane mode the right pane doesn't exist visually, so Tab is a no-op
+        // and falls through to the next handler.
+        if (e.Key == Key.Tab && !IsTextInputFocused() && Vm.IsDualPane)
         {
             if (Vm.ActivePane == Vm.LeftPane)
                 FocusPaneList(RightList, Vm.RightPane);
@@ -1287,8 +1475,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Left/Right arrows switch between left and right directory panes
-        if (Keyboard.Modifiers == ModifierKeys.None && IsListFocused())
+        // Left/Right arrows switch between left and right directory panes (dual-pane only)
+        if (Keyboard.Modifiers == ModifierKeys.None && IsListFocused() && Vm.IsDualPane)
         {
             if (e.Key == Key.Left)
             {
@@ -1330,6 +1518,21 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>Hide the F-key overlay as soon as Alt is released.</summary>
+    protected override void OnPreviewKeyUp(KeyEventArgs e)
+    {
+        base.OnPreviewKeyUp(e);
+        if (e.Key == Key.System && (e.SystemKey == Key.LeftAlt || e.SystemKey == Key.RightAlt))
+            Vm.IsFKeyOverlayVisible = false;
+    }
+
+    /// <summary>Belt-and-braces: hide the overlay if focus leaves the window while Alt was held.</summary>
+    protected override void OnDeactivated(EventArgs e)
+    {
+        base.OnDeactivated(e);
+        Vm.IsFKeyOverlayVisible = false;
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -1348,16 +1551,15 @@ public partial class MainWindow : Window
         if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control)
         { _ = ap.NewFileCommand.ExecuteAsync(null); e.Handled = true; return; }
 
-        // ── Filter (Ctrl+F) ──
-        if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+        // ── Search (Ctrl+F) ──
+        // Opens the recursive deep-search dialog. The per-pane inline filter
+        // (which only filters items already loaded in the current folder) is
+        // still reachable via the toolbar button and the View menu, but no
+        // longer hijacks Ctrl+F — that mental model is reserved for "search"
+        // in line with Windows Explorer / VS Code conventions.
+        if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control && !IsTextInputFocused())
         {
-            ap.ToggleFilterCommand.Execute(null);
-            if (ap.IsFilterVisible)
-            {
-                var box = Vm.ActivePane == Vm.LeftPane ? LeftFilterBox : RightFilterBox;
-                box.Focus();
-                box.SelectAll();
-            }
+            OpenSearch();
             e.Handled = true; return;
         }
 

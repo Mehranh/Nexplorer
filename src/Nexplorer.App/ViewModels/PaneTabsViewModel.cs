@@ -74,4 +74,14 @@ public sealed partial class PaneTabsViewModel : ObservableObject
     [RelayCommand]
     public void DuplicateTab()
         => AddTab(ActivePane.CurrentPath);
+
+    /// <summary>Reorders <paramref name="tab"/> to the given index, clamped to the strip's bounds.</summary>
+    public void MoveTab(PaneTabViewModel tab, int newIndex)
+    {
+        var current = Tabs.IndexOf(tab);
+        if (current < 0) return;
+        newIndex = Math.Clamp(newIndex, 0, Tabs.Count - 1);
+        if (newIndex == current) return;
+        Tabs.Move(current, newIndex);
+    }
 }

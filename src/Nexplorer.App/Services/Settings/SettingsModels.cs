@@ -14,6 +14,12 @@ public enum DefaultShell { PowerShell, Cmd }
 public enum AppTheme { Light, Dark, System, Modern, NeonSpace }
 public enum LogLevel { Error, Warning, Info, Debug }
 
+/// <summary>
+/// Row density for the file list. Maps to a row-height DynamicResource at runtime
+/// so it can be changed without a restart.
+/// </summary>
+public enum Density { Compact, Comfortable, Spacious }
+
 // ── Immutable persisted record ─────────────────────────────────────────────
 
 /// <summary>
@@ -159,11 +165,17 @@ public sealed record AppearanceSettings
     [JsonPropertyName("compactDensityMode")]
     public bool CompactDensityMode { get; init; }
 
+    [JsonPropertyName("density")]
+    public Density Density { get; init; } = Density.Comfortable;
+
     [JsonPropertyName("showPreviewPane")]
     public bool ShowPreviewPane { get; init; }
 
     [JsonPropertyName("showFolderTree")]
     public bool ShowFolderTree { get; init; } = true;
+
+    [JsonPropertyName("showSecondPane")]
+    public bool ShowSecondPane { get; init; }
 
     [JsonPropertyName("enableAnimations")]
     public bool EnableAnimations { get; init; } = true;

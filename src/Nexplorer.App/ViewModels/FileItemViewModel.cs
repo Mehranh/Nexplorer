@@ -34,6 +34,18 @@ public sealed partial class FileItemViewModel : ObservableObject
 
     [ObservableProperty] private string _name = string.Empty;
 
+    // ─── Subfolder context (set when this item was injected by the deep
+    // filter / search pipeline). Empty when the item lives directly in the
+    // pane's current folder. Bound by the Name-column cell template to show
+    // a small "in subfolder/path" subtitle so users can disambiguate hits
+    // pulled from nested directories. ─────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRelativeSubPath))]
+    private string _relativeSubPath = string.Empty;
+
+    public bool HasRelativeSubPath => !string.IsNullOrEmpty(RelativeSubPath);
+
     // ─── Inline rename state ──────────────────────────────────────────────
 
     [ObservableProperty] private bool   _isEditing;

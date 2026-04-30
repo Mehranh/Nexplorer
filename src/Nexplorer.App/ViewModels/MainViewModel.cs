@@ -263,6 +263,34 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>Which bottom-panel tab is active: "Terminal", "GitHistory", or "Git".</summary>
     [ObservableProperty] private string _activeBottomTab = "Terminal";
 
+    // ─── Pane layout ──────────────────────────────────────────────────────────
+
+    /// <summary>True when both panes are shown; false collapses the right pane.
+    /// Persisted via <see cref="AppearanceSettings.ShowSecondPane"/>.</summary>
+    [ObservableProperty] private bool _isDualPane =
+        App.SettingsService.Current.Appearance.ShowSecondPane;
+
+    /// <summary>
+    /// True while the user is holding Alt — drives the F-key overlay (Far Manager
+    /// shortcuts hint), replacing the always-on F-key bar.
+    /// </summary>
+    [ObservableProperty] private bool _isFKeyOverlayVisible;
+
+    /// <summary>Toggle dual-pane mode (Ctrl+\). Persists the choice to settings.</summary>
+    [RelayCommand]
+    private void ToggleDualPane()
+    {
+        IsDualPane = !IsDualPane;
+
+        // When collapsing back to single-pane, ensure the left pane is the focused one.
+        if (!IsDualPane) ActivateLeftPane();
+
+        App.SettingsService.Update(s => s with
+        {
+            Appearance = s.Appearance with { ShowSecondPane = IsDualPane }
+        });
+    }
+
     [RelayCommand]
     private void SwitchBottomTab(string tab)
     {
@@ -355,7 +383,7 @@ public sealed partial class MainViewModel : ObservableObject
             new("file.invertSel",   "Invert Selection",         "File",   null,        "SelectInverse",     () => ActivePane.InvertSelectionCommand.Execute(null)),
 
             // ── View ──
-            new("view.filter",      "Toggle Filter Bar",        "View",   "Ctrl+F",    "Filter",            () => ActivePane.ToggleFilterCommand.Execute(null)),
+            new("view.filter",      "Filter Current Folder",    "View",   null,        "Filter",            () => ActivePane.ToggleFilterCommand.Execute(null)),
             new("view.preview",     "Toggle Preview Pane",      "View",   "F8",        "EyeOutline",        () => ActivePane.TogglePreviewCommand.Execute(null)),
             new("view.details",     "View: Details",            "View",   null,        "ViewList",          () => ActivePane.SetViewModeCommand.Execute("Details")),
             new("view.largeIcons",  "View: Large Icons",        "View",   null,        "ViewGrid",          () => ActivePane.SetViewModeCommand.Execute("LargeIcons")),
@@ -364,7 +392,7 @@ public sealed partial class MainViewModel : ObservableObject
             new("view.tiles",       "View: Tiles",              "View",   null,        "ViewDashboard",     () => ActivePane.SetViewModeCommand.Execute("Tiles")),
 
             // ── Tools ──
-            new("tool.search",      "Search Files",             "Tools",  "F9",        "Magnify",           () => DialogRequested?.Invoke("Search")),
+            new("tool.search",      "Search Files",             "Tools",  "Ctrl+F",    "Magnify",           () => DialogRequested?.Invoke("Search")),
             new("tool.batchRename", "Batch Rename",             "Tools",  "Ctrl+M",    "FormTextbox",       () => BatchRename()),
             new("tool.quickEdit",   "Quick Edit",               "Tools",  "F3",        "FileEditOutline",   () => DialogRequested?.Invoke("QuickEdit")),
             new("tool.diff",        "Diff Files (L ↔ R)",       "Tools",  "Ctrl+D",    "FileCompare",       () => DialogRequested?.Invoke("Diff")),

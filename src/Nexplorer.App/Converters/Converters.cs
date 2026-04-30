@@ -36,6 +36,63 @@ public sealed class InverseBoolToVisibilityConverter : IValueConverter
         => (Visibility)value != Visibility.Visible;
 }
 
+/// <summary>
+/// bool → <see cref="GridLength"/>. Used to collapse the right-pane column when the
+/// user toggles single-pane mode. Pass the "true" length as the converter parameter
+/// (e.g. <c>"*"</c> or <c>"5"</c>); a value of <c>false</c> always returns 0.
+/// </summary>
+[ValueConversion(typeof(bool), typeof(GridLength))]
+public sealed class BoolToGridLengthConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is not true) return new GridLength(0);
+        var spec = parameter as string ?? "*";
+        return (GridLength)new GridLengthConverter().ConvertFromInvariantString(spec)!;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>
+/// bool → double. Used to drop a <see cref="ColumnDefinition.MinWidth"/> floor
+/// when the column is logically collapsed. Parameter is the "true" value
+/// (e.g. <c>"200"</c>); false maps to 0.
+/// </summary>
+[ValueConversion(typeof(bool), typeof(double))]
+public sealed class BoolToDoubleConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is not true) return 0.0;
+        return double.TryParse(parameter as string, NumberStyles.Float, CultureInfo.InvariantCulture, out var d) ? d : 0.0;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>
+/// Freezable wrapper that lets us bind to a DataContext from a control that
+/// isn't part of the visual tree (e.g. <see cref="ColumnDefinition"/>).
+/// Used by declaring it as a resource and pointing <c>Data</c> at the desired
+/// data context, then binding via <c>Source={StaticResource ProxyKey}</c>.
+/// </summary>
+public sealed class BindingProxy : System.Windows.Freezable
+{
+    public static readonly DependencyProperty DataProperty = DependencyProperty.Register(
+        nameof(Data), typeof(object), typeof(BindingProxy));
+
+    public object? Data
+    {
+        get => GetValue(DataProperty);
+        set => SetValue(DataProperty, value);
+    }
+
+    protected override System.Windows.Freezable CreateInstanceCore() => new BindingProxy();
+}
+
 // ── null/empty → Visibility ─────────────────────────────────────────────────
 
 /// <summary>non-null → Visible, null or empty string → Collapsed.</summary>

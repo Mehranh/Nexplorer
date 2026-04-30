@@ -23,7 +23,8 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="Search:" VerticalAlignment="Center"/>
-            <TextBox x:Name="QueryBox" Grid.Column="1" FontSize="14"/>
+            <TextBox x:Name="QueryBox" Grid.Column="1" FontSize="14"
+                     ToolTip="Substring match by default. Use wildcards like *.txt or report?.docx, or enable 'Use Regex' for full regex."/>
         </Grid>
         <Grid Grid.Row="0" Margin="0,36,0,0">
             <Grid.ColumnDefinitions>

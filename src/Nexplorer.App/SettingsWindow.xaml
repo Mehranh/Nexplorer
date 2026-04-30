@@ -34,6 +34,9 @@
         <ObjectDataProvider x:Key="AppThemeValues"          MethodName="GetValues" ObjectType="{x:Type settings:AppTheme}">
             <ObjectDataProvider.MethodParameters><x:Type TypeName="settings:AppTheme"/></ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="DensityValues"           MethodName="GetValues" ObjectType="{x:Type settings:Density}">
+            <ObjectDataProvider.MethodParameters><x:Type TypeName="settings:Density"/></ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <ObjectDataProvider x:Key="LogLevelValues"          MethodName="GetValues" ObjectType="{x:Type settings:LogLevel}">
             <ObjectDataProvider.MethodParameters><x:Type TypeName="settings:LogLevel"/></ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
@@ -340,9 +343,16 @@
                         <TextBox Text="{Binding AccentColor, UpdateSourceTrigger=PropertyChanged}"
                                  Width="120" Style="{StaticResource SettingTextBox}"/>
 
+                        <TextBlock Text="Density" Style="{StaticResource SettingLabel}"/>
+                        <ComboBox SelectedItem="{Binding Density}"
+                                  ItemsSource="{Binding Source={StaticResource DensityValues}}"
+                                  Style="{StaticResource SettingCombo}"/>
+
                         <CheckBox Content="Compact density mode" IsChecked="{Binding CompactDensityMode}"
                                   Style="{StaticResource SettingCheck}" Margin="0,12,0,0"/>
                         <CheckBox Content="Show preview pane by default" IsChecked="{Binding ShowPreviewPane}"
+                                  Style="{StaticResource SettingCheck}"/>
+                        <CheckBox Content="Show second pane (dual-pane)" IsChecked="{Binding ShowSecondPane}"
                                   Style="{StaticResource SettingCheck}"/>
                         <CheckBox Content="Show folder tree"   IsChecked="{Binding ShowFolderTree}"
                                   Style="{StaticResource SettingCheck}"/>
