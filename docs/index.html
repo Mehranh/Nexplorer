@@ -25,10 +25,16 @@
         }
         header .logo {
             width: 36px; height: 36px;
-            background: linear-gradient(135deg, #1e88e5, #1976d2);
+            background: linear-gradient(135deg, #121E40, #050A1C);
             border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 1.2rem; color: #fff;
+            font-weight: 700; font-size: 1.2rem;
+        }
+        header .logo span {
+            background: linear-gradient(135deg, #34D3EE 0%, #7AA2F7 55%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
         header h1 { font-size: 1.25rem; font-weight: 600; }
         header .ver { color: #8b949e; font-size: .85rem; margin-left: .25rem; }
@@ -94,7 +100,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">N</div>
+        <div class="logo"><span>N</span></div>
         <h1>Nexplorer <span class="ver">v1.0.19</span></h1>
     </header>
     <main>

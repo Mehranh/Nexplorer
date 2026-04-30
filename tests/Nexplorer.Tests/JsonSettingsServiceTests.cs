@@ -24,6 +24,35 @@ public sealed class JsonSettingsServiceTests : IDisposable
 
     private JsonSettingsService CreateService() => new(_filePath);
 
+    /// <summary>
+    /// Polls the settings file until <paramref name="predicate"/> returns true on its contents,
+    /// or the timeout elapses. The 500 ms debounce + async file write can take longer than a
+    /// fixed delay on slow CI runners, so we poll instead of using <see cref="Task.Delay(int)"/>.
+    /// Opens the file with <see cref="FileShare.ReadWrite"/> to avoid colliding with the
+    /// service's concurrent writer (whose IOException would otherwise be swallowed by the
+    /// fire-and-forget timer callback, causing the save to silently never land on disk).
+    /// </summary>
+    private async Task WaitForFileAsync(Func<string, bool> predicate, int timeoutMs = 5000)
+    {
+        var deadline = Environment.TickCount + timeoutMs;
+        while (Environment.TickCount < deadline)
+        {
+            if (File.Exists(_filePath))
+            {
+                try
+                {
+                    using var stream = new FileStream(
+                        _filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using var reader = new StreamReader(stream);
+                    var json = await reader.ReadToEndAsync();
+                    if (predicate(json)) return;
+                }
+                catch (IOException) { /* transient sharing issue – retry */ }
+            }
+            await Task.Delay(50);
+        }
+    }
+
     // ── Load / defaults ────────────────────────────────────────────────────
 
     [Fact]
@@ -93,8 +122,8 @@ public sealed class JsonSettingsServiceTests : IDisposable
             Performance = s.Performance with { MaxIconCacheSizeMb = 512 }
         });
 
-        // Wait for debounce
-        await Task.Delay(800);
+        // Wait for the debounced save to land on disk (poll up to 5s for CI tolerance).
+        await WaitForFileAsync(json => json.Contains("512"));
 
         var json = await File.ReadAllTextAsync(_filePath);
         Assert.Contains("512", json);
@@ -214,8 +243,9 @@ public sealed class JsonSettingsServiceTests : IDisposable
             Advanced       = s.Advanced with { LogLevel = LogLevel.Debug },
         });
 
-        // Wait for debounce + reload
-        await Task.Delay(800);
+        // Wait for the debounced save to land on disk (poll up to 5s for CI tolerance).
+        // Use a marker only present after the update is persisted.
+        await WaitForFileAsync(json => json.Contains("singleClick"));
 
         using var svc2 = CreateService();
         await svc2.LoadAsync();
